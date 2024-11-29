@@ -4,10 +4,12 @@ import User from "@/lib/models/user";
 import { Types } from "mongoose";
 import Plan from "@/lib/models/plan";
 
+type Params = Promise<{ userId: string }>;
+
 // get user details api
-export const GET = async (request: Request, context: { params: any }) => {
+export const GET = async (request: Request, context: { params: Params }) => {
   try {
-    const userId = context.params.userId;
+    const { userId } = await context.params;
 
     // check if the userId exist and is valid
     if (!userId || !Types.ObjectId.isValid(userId)) {
@@ -51,9 +53,9 @@ export const GET = async (request: Request, context: { params: any }) => {
 };
 
 // update user api
-export const PUT = async (request: Request, context: { params: any }) => {
+export const PUT = async (request: Request, context: { params: Params }) => {
   try {
-    const userId = context.params.userId;
+    const { userId } = await context.params;
     // extract the fields from the request object
     const { data } = await request.json();
 
