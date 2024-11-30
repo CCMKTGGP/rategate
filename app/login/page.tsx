@@ -95,7 +95,14 @@ export default function Login() {
         return router.push(`/application/${data?._id}/onboarding`);
       }
       if (data.current_onboarding_step === COLLECT_SURVEY) {
-        return router.push(`/application/${data?._id}/collect-survey`);
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("businessId", data.business_id);
+            return router.push(`/application/${data?._id}/collect-survey`);
+          }
+        } catch (error) {
+          console.error("Error while setting token in localStorage:", error);
+        }
       }
       return router.push(
         `/application/${data?._id}/${data?.business_id}/dashboard`
