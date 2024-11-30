@@ -42,6 +42,7 @@ export default function Onboarding() {
     nameError: "",
     emailError: "",
     phoneNumberError: "",
+    urlError: "",
     apiError: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -86,34 +87,20 @@ export default function Onboarding() {
     return true;
   }
 
-  // const [platformURLError, setPlatformURLError] = useState("");
-
-  // function isValidURL(url: string) {
-  //   const urlRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i;
-  //   return urlRegex.test(url);
-  // }
-
-  // function checkURL(url: string) {
-  //   if (!isValidURL(url)) {
-  //     setPlatformURLError("Invalid URL");
-  //     return false;
-  //   }
-  //   setPlatformURLError("");
-  //   return true;
-  // }
+  function isValidURL(url: string) {
+    const urlRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i;
+    return urlRegex.test(url);
+  }
 
   const BUSINESS_INFO_COMPONENT = (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h1 className="text-4xl leading-8 text-heading font-archivo font-bold">
+        <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
           Tell us more about your business
         </h1>
-        <p className="text-base leading-6 text-subHeading w-[80%]">
-          one liner here
-        </p>
       </div>
       <div className="flex flex-col gap-4">
-        <form className="w-[400px]">
+        <form className="w-[500px]">
           <Input
             type="text"
             label="Business Name"
@@ -185,10 +172,10 @@ export default function Onboarding() {
   const SELECT_PLATFORMS_COMPONENT = (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h1 className="text-4xl leading-10 text-heading font-archivo font-bold max-w-[90%]">
+        <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
           {"Choose the platforms where you'd like to collect reviews."}
         </h1>
-        <p className="text-base leading-6 text-subHeading w-[80%]">
+        <p className="text-base leading-6 text-[#6E7787] w-[80%]">
           {
             "Don’t worry if you haven’t got the links now, you can add them later."
           }
@@ -205,11 +192,8 @@ export default function Onboarding() {
               <div key={id}>
                 <PlatformCheckbox
                   url={selectedPlatform[0]?.url}
-                  label={label}
-                  id={id}
-                  name={name}
+                  platform={{ id, name, helpertext: helperText, label }}
                   checked={checked}
-                  helpertext={helperText}
                   onSelect={({ id, name }) => {
                     let updatedPlatforms = platforms;
                     if (selectedPlatform.length > 0) {
@@ -258,7 +242,18 @@ export default function Onboarding() {
               }
             />
           )}
-          <div className="flex justify-between my-6">
+          {error.urlError && (
+            <ApiError
+              message={error.urlError}
+              setMessage={(value) =>
+                setError((error) => ({
+                  ...error,
+                  urlError: value,
+                }))
+              }
+            />
+          )}
+          <div className="flex justify-between mt-12 mb-6">
             <Button
               isDisabled={isLoading}
               isLoading={isLoading}
@@ -284,6 +279,23 @@ export default function Onboarding() {
   );
 
   async function handleCreateBusiness() {
+    // check whether all the urls added are in correct format
+    const validUrls = platforms.filter((platform) => platform.url.trim());
+    const invalidUrls = validUrls.filter(
+      (platform) => !isValidURL(platform.url)
+    );
+    if (invalidUrls.length > 0) {
+      setError((error) => ({
+        ...error,
+        urlError:
+          "Invalid URLs found. Please make sure to add valid URLs for each platform.",
+      }));
+      return;
+    }
+    setError((error) => ({
+      ...error,
+      urlError: "",
+    }));
     setIsLoading(true);
     try {
       const response = await postData("/api/business", {

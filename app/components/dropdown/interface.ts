@@ -11,7 +11,7 @@ export interface IDropdownProps {
     name: string;
   };
   onClick?: (value: { id: string; name: string }) => void;
-  hasError?: boolean;
   error?: string;
+  helpertext?: string;
   isDisabled?: boolean;
 }

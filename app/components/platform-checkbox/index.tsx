@@ -4,16 +4,15 @@ import Input from "../input";
 import { IPlatformCheckboxProps } from "./interface";
 
 export default function PlatformCheckbox({
-  label,
-  id,
-  name,
-  helpertext,
+  platform,
+  checked,
   isLoading,
   url,
-  checked,
   onSelect,
   onChange,
 }: IPlatformCheckboxProps) {
+  const { label, id, name, helpertext } = platform;
+
   return (
     <div
       className={`my-2 py-2 flex flex-col gap-2 rounded-[8px]  ${
@@ -26,7 +25,7 @@ export default function PlatformCheckbox({
         onClick={() => onSelect({ id, name })}
       >
         <div
-          className={`w-8 h-8 flex items-center justify-center rounded-[8px] ${
+          className={`w-7 h-7 flex items-center justify-center rounded-[8px] ${
             checked ? "bg-primary border-0" : "bg-white border border-stroke"
           }`}
         >

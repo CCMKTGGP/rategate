@@ -9,8 +9,8 @@ export default function Dropdown(props: IDropdownProps) {
     onClick,
     options,
     selectedOption,
-    hasError,
-    error,
+    error = "",
+    helpertext = "",
     isDisabled,
   } = props;
   return (
@@ -22,12 +22,12 @@ export default function Dropdown(props: IDropdownProps) {
         {label}
       </label>
       <div className="absolute top-[45px] right-[10px] z-10">
-          <ArrowDownSvg width="20" height="20" fill="#BCC1CA" />
-        </div>
+        <ArrowDownSvg width="20" height="20" fill="#BCC1CA" />
+      </div>
       <select
         id={id}
         className={`w-full pl-4 pr-8 py-2 mb-2 outline-none bg-white border placeholder:text-sm placeholder:text-grey rounded-md appearance-none relative ${
-          hasError ? "border-error" : "border-stroke/50"
+          error !== "" ? "border-error" : "border-stroke/50"
         }`}
         disabled={isDisabled}
         value={selectedOption?.name || "select an option"}
@@ -56,7 +56,10 @@ export default function Dropdown(props: IDropdownProps) {
           </option>
         ))}
       </select>
-      {hasError ? (
+      {helpertext !== "" ? (
+        <p className="text-stroke text-sm font-medium">{helpertext}</p>
+      ) : null}
+      {error !== "" ? (
         <p className="text-error text-sm font-medium">{error}</p>
       ) : null}
     </div>
