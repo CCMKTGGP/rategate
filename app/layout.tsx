@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { UserContext } from "@/context/userContext";
+import { BusinessContext } from "@/context/businessContext";
 
 export const metadata: Metadata = {
   title: "Rategate",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <UserContext>{children}</UserContext>
+        <UserContext>
+          <BusinessContext>{children}</BusinessContext>
+        </UserContext>
       </body>
     </html>
   );

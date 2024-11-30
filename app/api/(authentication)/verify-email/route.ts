@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import connect from "@/lib/db";
 import User from "@/lib/models/user";
+import { COLLECT_BUSINESS_INFO } from "@/constants/onboarding-constants";
 
 export async function GET(reqeust: Request) {
   try {
@@ -40,6 +41,7 @@ export async function GET(reqeust: Request) {
     user.number_of_retries = undefined;
     user.verify_token = undefined;
     user.verify_token_expire = undefined;
+    user.current_onboarding_step = COLLECT_BUSINESS_INFO;
 
     await user.save();
 

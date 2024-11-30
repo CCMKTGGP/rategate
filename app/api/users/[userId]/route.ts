@@ -79,7 +79,7 @@ export const PUT = async (request: Request, context: { params: Params }) => {
       );
     }
 
-    // update the product
+    // update the user
     const updatedUser = await User.findOneAndUpdate(
       { _id: user._id },
       {

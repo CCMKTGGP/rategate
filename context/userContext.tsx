@@ -1,4 +1,8 @@
 "use client";
+import {
+  COLLECT_BUSINESS_INFO,
+  COLLECT_SURVEY,
+} from "@/constants/onboarding-constants";
 import { fetchData } from "@/utils/fetch";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -65,10 +69,23 @@ export function UserContext({ children }: { children: React.ReactNode }) {
       try {
         const response = await fetchData(`/api/users/${userId}`);
         const { data } = response;
+        setUser(data);
         if (!data?.is_verified && !authPathNames.includes(pathname)) {
           router.push("/email-not-verified");
         }
-        setUser(data);
+        if (
+          (!data?.business_id ||
+            data.current_onboarding_step === COLLECT_BUSINESS_INFO) &&
+          !authPathNames.includes(pathname)
+        ) {
+          return router.push(`/application/${data?._id}/onboarding`);
+        }
+        if (
+          data.current_onboarding_step === COLLECT_SURVEY &&
+          !authPathNames.includes(pathname)
+        ) {
+          return router.push(`/application/${data?._id}/collect-survey`);
+        }
       } catch (err: any) {
         router.push("/login");
       } finally {

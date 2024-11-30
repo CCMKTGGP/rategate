@@ -15,7 +15,6 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedTimezone, setSelectedTimezone] = useState("");
   const [error, setError] = useState({
     emailError: "",
     passwordError: "",
@@ -130,7 +129,6 @@ export default function Register() {
         lastName,
         email,
         password,
-        timeZone: selectedTimezone,
       });
       const { data } = response;
       if (data) {

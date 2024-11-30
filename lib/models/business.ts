@@ -14,14 +14,11 @@ const BusinessSchema = new Schema(
       type: String,
     },
     platforms: {
-      type: {
-        name: {
-          type: String,
-        },
-        url: {
-          type: String,
-        },
-      },
+      type: Array<{
+        id: String;
+        name: String;
+        url: String;
+      }>,
     },
   },
   {

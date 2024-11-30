@@ -31,6 +31,10 @@ const UserSchema = new Schema(
     verify_token_expire: {
       type: Date,
     },
+    current_onboarding_step: {
+      type: String,
+      default: null,
+    },
     plan_id: {
       type: Schema.Types.ObjectId,
       ref: "Plan",

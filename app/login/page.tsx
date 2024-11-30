@@ -8,6 +8,10 @@ import Input from "../components/input";
 import ApiError from "../components/api-error";
 import Button from "../components/button";
 import { postData } from "@/utils/fetch";
+import {
+  COLLECT_BUSINESS_INFO,
+  COLLECT_SURVEY,
+} from "@/constants/onboarding-constants";
 
 export default function Login() {
   const router = useRouter();
@@ -81,10 +85,21 @@ export default function Login() {
         console.error("Error while setting token in localStorage:", error);
       }
       setUser(data);
-      if (!data?.isVerified) {
+      if (!data?.is_verified) {
         return router.push(`/email-not-verified`);
       }
-      return router.push(`/application/${data?._id}/dashboard`);
+      if (
+        !data?.business_id ||
+        data.current_onboarding_step === COLLECT_BUSINESS_INFO
+      ) {
+        return router.push(`/application/${data?._id}/onboarding`);
+      }
+      if (data.current_onboarding_step === COLLECT_SURVEY) {
+        return router.push(`/application/${data?._id}/collect-survey`);
+      }
+      return router.push(
+        `/application/${data?._id}/${data?.business_id}/dashboard`
+      );
     } catch (err: any) {
       setError((error) => ({
         ...error,
@@ -100,7 +115,7 @@ export default function Login() {
         <div className="py-8 px-6">
           <img src="./logo.png" alt="Rategate Logo" className="h-8" />
         </div>
-        <div className="py-12 w-full flex flex-col items-center">
+        <div className="py-8 w-full flex flex-col items-center">
           <div className="flex flex-col w-[400px] gap-12">
             <div className="flex flex-col items-center gap-4">
               <h1 className="text-4xl leading-8 text-heading font-archivo font-bold">
