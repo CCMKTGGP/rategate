@@ -1,6 +1,6 @@
 "use client";
 import { IBusiness } from "@/context/businessContext";
-import { fetchData } from "@/utils/fetch";
+import { fetchData, postData } from "@/utils/fetch";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Button from "../button";
@@ -16,6 +16,8 @@ import {
   SELECT_PLATFORM,
 } from "@/constants/review_steps";
 import Input from "../input";
+import ApiSuccess from "../api-success";
+import ApiError from "../api-error";
 
 export default function ReviewForm({
   businessId,
@@ -28,10 +30,15 @@ export default function ReviewForm({
 }) {
   const router = useRouter();
   const [business, setBusiness] = useState<IBusiness>();
+  const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
   const [negativeFeedback, setNegativeFeedback] = useState("");
+  const [postReviewLoading, setPostReviewLoading] = useState(false);
+  const [contactFormLoading, setContactFormLoading] = useState(false);
+  const [_, setReviewSuccessMessage] = useState("");
+  const [contactSuccessMessage, setContactSuccessMessage] = useState("");
   const [contactFormDetails, setContactFormDetails] = useState({
     firstName: "",
     lastName: "",
@@ -44,6 +51,7 @@ export default function ReviewForm({
     negativeFeedbackError: "",
     apiError: "",
   });
+  const [noBusinessError, setNoBusinessError] = useState(false);
 
   // destructure the state here
   const { firstName, lastName, email } = contactFormDetails;
@@ -53,12 +61,10 @@ export default function ReviewForm({
       try {
         const response = await fetchData(`/api/business/${businessId}`);
         const { data } = response;
-        setBusiness(data);
+        setBusiness(data.business);
+        setIsAllowedToReview(data.is_allowed_to_review);
       } catch (err: any) {
-        setError((error) => ({
-          ...error,
-          apiError: err.message,
-        }));
+        setNoBusinessError(true);
       } finally {
         setIsLoading(false);
       }
@@ -146,6 +152,70 @@ export default function ReviewForm({
     ].every(Boolean);
 
     if (!ALL_CHECKS_PASS) return;
+    setContactFormLoading(true);
+    try {
+      const response = await postData(`/api/contact`, {
+        firstName,
+        lastName,
+        email,
+        businessId,
+      });
+      setContactSuccessMessage("Thank you for your contact!");
+      router.push("/");
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setContactFormLoading(false);
+    }
+  }
+
+  async function handlePostPositiveFeedback(url: string) {
+    setPostReviewLoading(true);
+    try {
+      const response = await postData(`/api/review`, {
+        rating,
+        businessId,
+        locationId,
+        employeeId,
+      });
+      const { message } = response;
+      setReviewSuccessMessage(message);
+      setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
+      window.open(url, "_blank");
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setPostReviewLoading(false);
+    }
+  }
+
+  async function handlePostNegativeFeedback() {
+    setPostReviewLoading(true);
+    try {
+      const response = await postData(`/api/review`, {
+        rating,
+        feedback: negativeFeedback,
+        businessId,
+        locationId,
+        employeeId,
+      });
+      const { message } = response;
+      setReviewSuccessMessage(message);
+      setCurrentStep(NEGATIVE_FEEDBACK_THANK_YOU);
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setPostReviewLoading(false);
+    }
   }
 
   const LANDING_PAGE_COMPONENT = (
@@ -249,11 +319,8 @@ export default function ReviewForm({
                   key={index}
                   type="button"
                   className="w-[150px] h-[150px] md:w-[250px] md:h-[200px] bg-white border border-stroke/20 rounded-[12px] shadow-card flex flex-col items-center justify-center gap-6"
-                  onClick={() => {
-                    // call the post review api
-                    setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
-                    window.open(platform.url, "_blank");
-                  }}
+                  onClick={() => handlePostPositiveFeedback(platform.url)}
+                  disabled={postReviewLoading}
                 >
                   <Image
                     src={`/${platform.id}.svg`}
@@ -269,6 +336,11 @@ export default function ReviewForm({
               );
             })}
         </div>
+        {postReviewLoading && (
+          <p className="text-base leading-6 text-subHeading">
+            posting your review...
+          </p>
+        )}
       </div>
     </div>
   );
@@ -312,9 +384,21 @@ export default function ReviewForm({
               {error.negativeFeedbackError}
             </p>
           ) : null}
+          {error.apiError && (
+            <ApiError
+              message={error.apiError}
+              setMessage={(value) =>
+                setError((error) => ({
+                  ...error,
+                  apiError: value,
+                }))
+              }
+            />
+          )}
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
+            isDisabled={postReviewLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
             buttonText="Cancel"
             onClick={() => {
@@ -322,6 +406,8 @@ export default function ReviewForm({
             }}
           />
           <Button
+            isDisabled={postReviewLoading}
+            isLoading={postReviewLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
             buttonText="Continue"
             onClick={() => {
@@ -332,8 +418,7 @@ export default function ReviewForm({
                 });
                 return;
               }
-              // call the post review api
-              setCurrentStep(NEGATIVE_FEEDBACK_THANK_YOU);
+              handlePostNegativeFeedback();
             }}
           />
         </div>
@@ -455,9 +540,29 @@ export default function ReviewForm({
             error={error.emailError}
             disabled={isLoading}
           />
+          {error.apiError && (
+            <ApiError
+              message={error.apiError}
+              setMessage={(value) =>
+                setError((error) => ({
+                  ...error,
+                  apiError: value,
+                }))
+              }
+            />
+          )}
+          {contactSuccessMessage && (
+            <div className="flex justify-center">
+              <ApiSuccess
+                message={contactSuccessMessage}
+                setMessage={(value) => setContactSuccessMessage(value)}
+              />
+            </div>
+          )}
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
+            isDisabled={contactFormLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
             buttonText="Form Reset"
             onClick={() => {
@@ -469,6 +574,8 @@ export default function ReviewForm({
             }}
           />
           <Button
+            isDisabled={contactFormLoading}
+            isLoading={contactFormLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
             buttonText="Submit"
             onClick={() => {
@@ -488,7 +595,7 @@ export default function ReviewForm({
     );
   }
 
-  if (error.apiError) {
+  if (noBusinessError) {
     return (
       <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
         <div className="py-4">
@@ -519,6 +626,34 @@ export default function ReviewForm({
                 router.push("/");
               }}
             />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!isAllowedToReview) {
+    return (
+      <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
+        <div className="py-4">
+          <Image
+            src="/logo.png"
+            alt="Logo of Rategate"
+            className="h-8"
+            width={135}
+            height={50}
+            priority
+          />
+        </div>
+        <div className="py-6 flex flex-col gap-8">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
+              Maxed out free reviews!
+            </h2>
+            <p className="text-base leading-6 text-subHeading">
+              Your business has maxed out the free reviews on basic plan. Please
+              subscribe to a plan to get more reviews.
+            </p>
           </div>
         </div>
       </main>

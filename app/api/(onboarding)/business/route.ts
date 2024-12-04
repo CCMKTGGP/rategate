@@ -4,6 +4,8 @@ import { Types } from "mongoose";
 import Business from "@/lib/models/business";
 import User from "@/lib/models/user";
 import { COLLECT_SURVEY } from "@/constants/onboarding-constants";
+import Plan from "@/lib/models/plan";
+import { PlanTypes } from "@/utils/planTypes";
 
 export const GET = async () => {
   try {
@@ -63,12 +65,20 @@ export const POST = async (request: Request) => {
       );
     }
 
+    // fetch all plans
+    const plans = await Plan.find();
+
+    const freePlan: any = plans.filter(
+      (plan) => plan.plan_id === PlanTypes.BASIC.toLowerCase()
+    );
+
     // create the new business object
     const newBusiness = new Business({
       name,
       email,
       phone_number: phoneNumber,
       platforms,
+      plan_id: new Types.ObjectId(freePlan?.[0]?._id),
     });
     await newBusiness.save();
 

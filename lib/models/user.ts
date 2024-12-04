@@ -35,14 +35,6 @@ const UserSchema = new Schema(
       type: String,
       default: null,
     },
-    plan_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Plan",
-    },
-    subscription_id: {
-      type: String,
-      default: null,
-    },
     business_id: {
       type: Schema.Types.ObjectId,
       ref: "Business",

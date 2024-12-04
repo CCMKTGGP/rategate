@@ -13,6 +13,13 @@ export interface IBusiness {
     name: string;
     url: string;
   }>;
+  plan: {
+    _id: string;
+    plan_id: string;
+    name: string;
+    max_reviews: string;
+    max_locations: string;
+  };
 }
 
 const INITIAL_STATE: IBusiness = {
@@ -21,6 +28,13 @@ const INITIAL_STATE: IBusiness = {
   email: "",
   phone_number: "",
   platforms: [],
+  plan: {
+    _id: "",
+    plan_id: "",
+    name: "",
+    max_reviews: "",
+    max_locations: "",
+  },
 };
 
 const Context = createContext<{
@@ -49,7 +63,7 @@ export function BusinessContext({ children }: { children: React.ReactNode }) {
       try {
         const response = await fetchData(`/api/business/${businessId}`);
         const { data } = response;
-        setBusiness(data);
+        setBusiness(data.business);
       } catch (err: any) {
         router.push("/login");
       } finally {

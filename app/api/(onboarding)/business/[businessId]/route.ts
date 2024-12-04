@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Business from "@/lib/models/business";
+import Plan from "@/lib/models/plan";
+import Review from "@/lib/models/review";
 
 type Params = Promise<{ businessId: string }>;
 
@@ -21,8 +23,14 @@ export const GET = async (request: Request, context: { params: Params }) => {
     // establish the database connection
     await connect();
 
+    // load all plans
+    await Plan.find({});
+
     // get business details from businessId
-    const business = await Business.findById(businessId);
+    const business = await Business.findById(businessId).populate({
+      path: "plan_id",
+      select: ["_id", "plan_id", "max_reviews"],
+    });
 
     if (!business) {
       return new NextResponse(
@@ -33,10 +41,21 @@ export const GET = async (request: Request, context: { params: Params }) => {
       );
     }
 
+    let is_allowed_to_review = true;
+    // check if the business has reached the maximum number of reviews
+    // fetch all the reviews where businessId is equal to params business id
+    const reviews = await Review.find({
+      business_id: new Types.ObjectId(businessId),
+    });
+
+    if (reviews.length >= business.plan_id.max_reviews) {
+      is_allowed_to_review = false;
+    }
+
     return new NextResponse(
       JSON.stringify({
         message: "Business Details fetched successfully!",
-        data: business,
+        data: { business, is_allowed_to_review },
       }),
       { status: 200 }
     );

@@ -20,6 +20,14 @@ const BusinessSchema = new Schema(
         url: String;
       }>,
     },
+    plan_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Plan",
+    },
+    subscription_id: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

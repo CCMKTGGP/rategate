@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
-import User from "@/lib/models/user";
 import Contact from "@/lib/models/contact";
+import Business from "@/lib/models/business";
 
 // create contact
 export const POST = async (request: Request) => {
@@ -21,8 +21,8 @@ export const POST = async (request: Request) => {
     // establish the database connection
     await connect();
 
-    // check if the user exists
-    const business = await User.findById(businessId);
+    // check if the business exists
+    const business = await Business.findById(businessId);
     if (!business) {
       return new NextResponse(
         JSON.stringify({ message: "Business does not exist!" }),

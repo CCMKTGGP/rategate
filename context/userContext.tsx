@@ -16,13 +16,6 @@ export interface IUser {
   verify_token?: string;
   verify_token_expire?: Date;
   number_of_retries?: number;
-  plan: {
-    _id: string;
-    plan_id: string;
-    name: string;
-    max_reviews: string;
-    max_locations: string;
-  };
 }
 
 const INITIAL_STATE: IUser = {
@@ -31,13 +24,6 @@ const INITIAL_STATE: IUser = {
   last_name: "",
   email: "",
   is_verified: false,
-  plan: {
-    _id: "",
-    plan_id: "",
-    name: "",
-    max_reviews: "",
-    max_locations: "",
-  },
 };
 
 const Context = createContext<{

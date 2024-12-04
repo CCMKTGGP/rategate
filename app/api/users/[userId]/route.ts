@@ -22,14 +22,8 @@ export const GET = async (request: Request, context: { params: Params }) => {
     // establish the database connection
     await connect();
 
-    // load all plans
-    await Plan.find({});
-
     // get user details from userID
-    let user = await User.findById(userId).populate({
-      path: "plan_id",
-      select: ["_id", "plan_id", "max_reviews"],
-    });
+    let user = await User.findById(userId);
 
     if (!user) {
       return new NextResponse(

@@ -47,13 +47,6 @@ export const POST = async (request: Request) => {
       );
     }
 
-    // fetch all plans
-    const plans = await Plan.find();
-
-    const freePlan: any = plans.filter(
-      (plan) => plan.plan_id === PlanTypes.BASIC.toLowerCase()
-    );
-
     // create the new user object
     const newUser = new User({
       first_name: firstName,
@@ -61,7 +54,6 @@ export const POST = async (request: Request) => {
       email,
       password: hashedPassword,
       number_of_retries: 0,
-      plan_id: new Types.ObjectId(freePlan?.[0]?._id),
     });
 
     // generate a verification token for the user and save it in the database
