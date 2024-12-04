@@ -9,6 +9,7 @@ export interface IBusiness {
   email: string;
   phone_number: string;
   platforms: Array<{
+    id: string;
     name: string;
     url: string;
   }>;
