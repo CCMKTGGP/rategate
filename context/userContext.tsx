@@ -18,7 +18,7 @@ export interface IUser {
   number_of_retries?: number;
 }
 
-const INITIAL_STATE: IUser = {
+export const INITIAL_USER_STATE: IUser = {
   _id: "",
   first_name: "",
   last_name: "",
@@ -32,7 +32,7 @@ const Context = createContext<{
   toggleFetchUserDetails: boolean;
   setToggleFetchUserDetails: (value: boolean) => void;
 }>({
-  user: INITIAL_STATE,
+  user: INITIAL_USER_STATE,
   setUser: () => {},
   toggleFetchUserDetails: false,
   setToggleFetchUserDetails: () => {},
@@ -45,7 +45,7 @@ export function UserContext({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const userId =
     (typeof window !== "undefined" && localStorage.getItem("userId")) ?? "";
-  const [user, setUser] = useState<IUser>(INITIAL_STATE);
+  const [user, setUser] = useState<IUser>(INITIAL_USER_STATE);
   const [toggleFetchUserDetails, setToggleFetchUserDetails] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>();

@@ -7,6 +7,7 @@ import { postData } from "@/utils/fetch";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Register() {
   const router = useRouter();
@@ -157,7 +158,14 @@ export default function Register() {
     <main className="flex items-center bg-background">
       <div className="bg-white h-[100vh] w-[50%] overflow-auto">
         <div className="py-8 px-6">
-          <img src="./logo.png" alt="Rategate Logo" className="h-8" />
+          <Image
+            src="/logo.png"
+            alt="Logo of Rategate"
+            className="h-8"
+            width={135}
+            height={50}
+            priority
+          />
         </div>
         <div className="py-12 w-full flex flex-col items-center">
           <div className="flex flex-col w-[400px] gap-12">
@@ -279,10 +287,13 @@ export default function Register() {
             {"First things first, let’s set you up with an account.👋🏼"}
           </p>
         </div>
-        <img
-          src="./auth-illustration.png"
+        <Image
+          src="/auth-illustration.png"
           alt="Auth Illustration"
-          className="h-[400px]"
+          className="h-[350px]"
+          width={400}
+          height={100}
+          priority
         />
       </div>
     </main>

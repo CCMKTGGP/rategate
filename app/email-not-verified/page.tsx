@@ -5,6 +5,7 @@ import { useUserContext } from "@/context/userContext";
 import ApiSuccess from "../components/api-success";
 import ApiError from "../components/api-error";
 import { postData } from "@/utils/fetch";
+import Image from "next/image";
 
 export default function EmailNotVerified() {
   const { user } = useUserContext();
@@ -35,7 +36,14 @@ export default function EmailNotVerified() {
     <main className="flex items-center bg-background">
       <div className="bg-white h-[100vh] w-[50%]">
         <div className="py-8 px-6">
-          <img src="./logo.png" alt="Rategate Logo" className="h-8" />
+          <Image
+            src="/logo.png"
+            alt="Logo of Rategate"
+            className="h-8"
+            width={135}
+            height={50}
+            priority
+          />
         </div>
         <div className="py-12 w-full flex flex-col items-center">
           <div className="flex flex-col w-[400px] gap-12">
@@ -43,10 +51,13 @@ export default function EmailNotVerified() {
               <h1 className="text-4xl leading-8 text-heading font-archivo font-bold">
                 Verify your email
               </h1>
-              <img
-                src="./mail.png"
+              <Image
+                src="/mail.png"
                 alt="mail png image"
                 className="h-20 my-4"
+                width={100}
+                height={80}
+                priority
               />
             </div>
             <p className="text-sm text-center leading-6 text-subHeading mx-auto max-w-[90%]">
@@ -90,10 +101,13 @@ export default function EmailNotVerified() {
         </div>
       </div>
       <div className="w-[50%] h-full flex flex-col items-center gap-8">
-        <img
-          src="./email-verification-illustration.png"
+        <Image
+          src="/email-verification-illustration.png"
           alt="Email Verification Illustration"
-          className="h-[400px]"
+          className="h-[350px]"
+          width={500}
+          height={200}
+          priority
         />
       </div>
     </main>

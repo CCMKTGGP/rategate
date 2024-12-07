@@ -2,7 +2,6 @@
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
 import Dropdown from "@/app/components/dropdown";
-import Input from "@/app/components/input";
 import OnboardingMarker from "@/app/components/onboarding-marker";
 import {
   ALL_SET,
@@ -12,6 +11,7 @@ import {
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { postData } from "@/utils/fetch";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -191,7 +191,14 @@ export default function CollectSurvey() {
       <div className="bg-white h-[100vh] w-[50%] overflow-auto">
         <div className="px-12">
           <div className="py-12">
-            <img src="../../logo.png" alt="Rategate Logo" className="h-8" />
+            <Image
+              src="/logo.png"
+              alt="Logo of Rategate"
+              className="h-8"
+              width={135}
+              height={50}
+              priority
+            />
           </div>
           <div className="py-12 w-full flex flex-col gap-8">
             {/* onboarding steps */}
@@ -206,17 +213,23 @@ export default function CollectSurvey() {
       </div>
       <div className="w-[50%] h-full flex flex-col items-center gap-8">
         {currentStep === COLLECT_SURVEY && (
-          <img
-            src="../../onboarding-step-3.png"
+          <Image
+            src="/onboarding-step-3.png"
             alt="Onboarding Step 3"
-            className="h-[250px]"
+            className="h-[350px]"
+            width={350}
+            height={350}
+            priority
           />
         )}
         {currentStep === ALL_SET && (
-          <img
-            src="../../onboarding-step-4.png"
+          <Image
+            src="/onboarding-step-4.png"
             alt="Onboarding Step 4"
-            className="h-[250px]"
+            className="h-[350px]"
+            width={350}
+            height={350}
+            priority
           />
         )}
       </div>

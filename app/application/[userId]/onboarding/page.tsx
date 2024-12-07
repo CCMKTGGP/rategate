@@ -13,6 +13,7 @@ import { PLATFORMS } from "@/constants/onboarding_platforms";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { postData } from "@/utils/fetch";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -332,7 +333,14 @@ export default function Onboarding() {
       <div className="bg-white h-[100vh] w-[50%] overflow-auto">
         <div className="px-12">
           <div className="py-12">
-            <img src="../../logo.png" alt="Rategate Logo" className="h-8" />
+            <Image
+              src="/logo.png"
+              alt="Logo of Rategate"
+              className="h-8"
+              width={135}
+              height={50}
+              priority
+            />
           </div>
           <div className="py-12 w-full flex flex-col gap-8">
             {/* onboarding steps */}
@@ -347,17 +355,23 @@ export default function Onboarding() {
       </div>
       <div className="w-[50%] h-full flex flex-col items-center gap-8">
         {currentStep === COLLECT_BUSINESS_INFO && (
-          <img
-            src="../../onboarding-step-1.png"
+          <Image
+            src="/onboarding-step-1.png"
             alt="Onboarding Step 1"
             className="h-[250px]"
+            width={450}
+            height={250}
+            priority
           />
         )}
         {currentStep === SELECT_PLATFORMS && (
-          <img
-            src="../../onboarding-step-2.png"
+          <Image
+            src="/onboarding-step-2.png"
             alt="Onboarding Step 2"
             className="h-[250px]"
+            width={400}
+            height={200}
+            priority
           />
         )}
       </div>

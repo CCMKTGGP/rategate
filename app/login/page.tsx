@@ -12,6 +12,7 @@ import {
   COLLECT_BUSINESS_INFO,
   COLLECT_SURVEY,
 } from "@/constants/onboarding-constants";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -104,9 +105,16 @@ export default function Login() {
           console.error("Error while setting token in localStorage:", error);
         }
       }
-      return router.push(
-        `/application/${data?._id}/${data?.business_id}/dashboard`
-      );
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("businessId", data.business_id);
+          return router.push(
+            `/application/${data?._id}/${data?.business_id}/dashboard`
+          );
+        }
+      } catch (error) {
+        console.error("Error while setting token in localStorage:", error);
+      }
     } catch (err: any) {
       setError((error) => ({
         ...error,
@@ -120,7 +128,14 @@ export default function Login() {
     <main className="flex items-center bg-background">
       <div className="bg-white h-[100vh] w-[50%]">
         <div className="py-8 px-6">
-          <img src="./logo.png" alt="Rategate Logo" className="h-8" />
+          <Image
+            src="/logo.png"
+            alt="Logo of Rategate"
+            className="h-8"
+            width={135}
+            height={50}
+            priority
+          />
         </div>
         <div className="py-8 w-full flex flex-col items-center">
           <div className="flex flex-col w-[400px] gap-12">
@@ -215,10 +230,13 @@ export default function Login() {
             {"First things first, let’s set you up with an account.👋🏼"}
           </p>
         </div>
-        <img
-          src="./auth-illustration.png"
+        <Image
+          src="/auth-illustration.png"
           alt="Auth Illustration"
-          className="h-[400px]"
+          className="h-[350px]"
+          width={400}
+          height={100}
+          priority
         />
       </div>
     </main>

@@ -22,7 +22,7 @@ export interface IBusiness {
   };
 }
 
-const INITIAL_STATE: IBusiness = {
+export const INITIAL_BUSINESS_STATE: IBusiness = {
   _id: "",
   name: "",
   email: "",
@@ -43,7 +43,7 @@ const Context = createContext<{
   toggleFetchBusinessDetails: boolean;
   setToggleFetchBusinessDetails: (value: boolean) => void;
 }>({
-  business: INITIAL_STATE,
+  business: INITIAL_BUSINESS_STATE,
   setBusiness: () => {},
   toggleFetchBusinessDetails: false,
   setToggleFetchBusinessDetails: () => {},
@@ -53,7 +53,7 @@ export function BusinessContext({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const businessId =
     (typeof window !== "undefined" && localStorage.getItem("businessId")) ?? "";
-  const [business, setBusiness] = useState<IBusiness>(INITIAL_STATE);
+  const [business, setBusiness] = useState<IBusiness>(INITIAL_BUSINESS_STATE);
   const [toggleFetchBusinessDetails, setToggleFetchBusinessDetails] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>();
