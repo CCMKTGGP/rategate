@@ -54,7 +54,7 @@ export async function putData(url: string, body: any) {
   }
 }
 
-export async function deleteData(url: string, body: any) {
+export async function deleteData(url: string, body?: any) {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
   try {

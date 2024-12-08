@@ -7,7 +7,7 @@ export const PLATFORMS = [
   },
   {
     id: "GOOGLE",
-    name: "Google Business Profile",
+    name: "Google",
     helperText: "Enter your Google business location url here",
     label: "Label",
   },

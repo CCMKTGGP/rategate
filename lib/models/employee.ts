@@ -1,16 +1,22 @@
 import { Schema, model, models } from "mongoose";
 
-const ReviewSchema = new Schema(
+const EmployeeSchema = new Schema(
   {
-    rating: {
-      type: Number,
+    name: {
+      type: String,
       required: true,
     },
-    feedback: {
+    employee_id: {
       type: String,
+      required: true,
     },
-    provider: {
+    total_reviews: {
+      type: Number,
+      default: 0,
+    },
+    employee_payment_intent_id: {
       type: String,
+      default: null,
     },
     business_id: {
       type: Schema.Types.ObjectId,
@@ -22,16 +28,11 @@ const ReviewSchema = new Schema(
       ref: "Location",
       default: null,
     },
-    employee_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Employee",
-      default: null,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-const Review = models.Review || model("Review", ReviewSchema);
-export default Review;
+const Employee = models.Employee || model("Employee", EmployeeSchema);
+export default Employee;

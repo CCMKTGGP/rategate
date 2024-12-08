@@ -23,14 +23,8 @@ export const GET = async (request: Request) => {
     // establish the database connection
     await connect();
 
-    // load all plans
-    await Plan.find({});
-
     // get business details from businessId
-    const business = await Business.findById(businessId).populate({
-      path: "plan_id",
-      select: ["_id", "plan_id", "max_reviews"],
-    });
+    const business = await Business.findById(businessId);
     if (!business) {
       return new NextResponse(
         JSON.stringify({ message: "Business does not exist!" }),
@@ -60,13 +54,21 @@ export const GET = async (request: Request) => {
 export const POST = async (request: Request) => {
   try {
     // extract the request body from request
-    const { rating, feedback, businessId, locationId, employeeId } =
+    const { rating, feedback, provider, businessId, locationId, employeeId } =
       await request.json();
 
     // check if the businessId exist and is valid
     if (!businessId || !Types.ObjectId.isValid(businessId)) {
       return new NextResponse(
         JSON.stringify({ message: "Invalid or missing businessId!" }),
+        { status: 400 }
+      );
+    }
+
+    // check if locationId exist if yes then check if it is valid
+    if (locationId && !Types.ObjectId.isValid(locationId)) {
+      return new NextResponse(
+        JSON.stringify({ message: "Invalid locationId!" }),
         { status: 400 }
       );
     }
@@ -108,6 +110,7 @@ export const POST = async (request: Request) => {
     const newReview = new Review({
       rating,
       feedback: feedback ? feedback : null,
+      provider: provider ? provider : null,
       location_id: locationId ? new Types.ObjectId(locationId) : null,
       employee_id: employeeId ? new Types.ObjectId(employeeId) : null,
       business_id: new Types.ObjectId(business._id),

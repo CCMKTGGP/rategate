@@ -5,7 +5,7 @@ import React from "react";
 
 export default function Billing() {
   return (
-    <div className="flex items-start bg-background">
+    <div className="flex items-start bg-white">
       <Sidebar />
       <div className="flex-1 h-screen overflow-auto">
         <TopBar />
