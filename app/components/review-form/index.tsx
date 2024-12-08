@@ -18,6 +18,7 @@ import {
 import Input from "../input";
 import ApiSuccess from "../api-success";
 import ApiError from "../api-error";
+import { ILocation } from "@/app/api/location/interface";
 
 export default function ReviewForm({
   businessId,
@@ -30,6 +31,7 @@ export default function ReviewForm({
 }) {
   const router = useRouter();
   const [business, setBusiness] = useState<IBusiness>();
+  const [location, setLocation] = useState<ILocation>();
   const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,9 +71,24 @@ export default function ReviewForm({
         setIsLoading(false);
       }
     }
+    async function getLocationDetails() {
+      try {
+        const response = await fetchData(`/api/location/${locationId}`);
+        const { data } = response;
+        setLocation(data);
+      } catch (err: any) {
+        setNoBusinessError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
     if (businessId) {
       getBusinessDetails();
+    }
+
+    if (locationId) {
+      getLocationDetails();
     }
   }, [businessId]);
 
@@ -675,6 +692,11 @@ export default function ReviewForm({
       <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
         {business?.name}
       </h1>
+      {location?._id && (
+        <p className="text-base leading-[24px] font-medium text-subHeading">
+          {"Review Location ->"} {location?.name}
+        </p>
+      )}
       {currentStep === LANDING_PAGE && LANDING_PAGE_COMPONENT}
       {currentStep === COLLECT_RATING && CHOOSE_RATING}
       {currentStep === SELECT_PLATFORM && SHARE_ON_OTHER_PLATFORMS}

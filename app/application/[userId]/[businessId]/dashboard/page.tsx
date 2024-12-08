@@ -95,7 +95,7 @@ export default function Dashboard() {
     return (
       <table className="mt-8 table">
         <thead>
-          <tr className="rounded-[12px] border border-stroke/30">
+          <tr className="rounded-[12px] border border-stroke/60">
             <th className="text-sm leading-4 w-[20%] text-left font-medium text-subHeading p-4">
               Branch Name
             </th>
@@ -118,10 +118,14 @@ export default function Dashboard() {
             return (
               <tr
                 key={location._id}
-                className="rounded-[12px] border border-stroke/30 group"
+                className="rounded-[12px] border border-stroke/60 group"
               >
-                <td className="text-base leading-6 w-[20%] text-left font-medium text-subHeading p-4">
-                  {location.name}
+                <td className="text-base leading-6 w-[20%] text-left font-bold text-primary p-4 underline">
+                  <Link
+                    href={`/application/${user._id}/${business._id}/dashboard/view-location/${location._id}`}
+                  >
+                    {location.name}
+                  </Link>
                 </td>
                 <td className="text-base leading-6 w-[40%] text-left font-medium text-subHeading p-4">
                   {location.address}
@@ -190,7 +194,7 @@ export default function Dashboard() {
             </p>
             <div className="flex items-start gap-8 mt-6">
               <div className="w-[43%]">
-                <div className="bg-white rounded-[12px] shadow-card border border-stroke/20 px-6 py-4">
+                <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
                   <h4 className="text-lg leading-10 text-heading font-medium">
                     Status
                   </h4>
@@ -225,7 +229,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="w-[57%]">
-                <div className="bg-white rounded-[12px] shadow-card border border-stroke/20 px-6 py-4">
+                <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
                   <h4 className="text-lg leading-10 text-heading font-medium">
                     {`Review Platforms (${business?.platforms?.length})`}
                   </h4>
@@ -234,7 +238,7 @@ export default function Dashboard() {
                       return (
                         <div
                           key={index}
-                          className="min-w-[150px] max-w-[150px] min-h-[160px] max-h-[160px] bg-white border-2 border-stroke/40 rounded-[12px] flex flex-col items-center justify-center gap-6"
+                          className="min-w-[150px] max-w-[150px] min-h-[160px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-6"
                         >
                           <Image
                             src={`/${platform.id}.svg`}
