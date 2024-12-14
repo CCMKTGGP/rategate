@@ -9,6 +9,7 @@ import ApiError from "../components/api-error";
 import Button from "../components/button";
 import { postData } from "@/utils/fetch";
 import {
+  BUSINESS_EMAIL_NOT_VERIFIED,
   COLLECT_BUSINESS_INFO,
   COLLECT_SURVEY,
 } from "@/constants/onboarding-constants";
@@ -95,19 +96,23 @@ export default function Login() {
       ) {
         return router.push(`/application/${data?._id}/onboarding`);
       }
-      if (data.current_onboarding_step === COLLECT_SURVEY) {
-        try {
-          if (typeof window !== "undefined") {
-            localStorage.setItem("businessId", data.business_id);
-            return router.push(`/application/${data?._id}/collect-survey`);
-          }
-        } catch (error) {
-          console.error("Error while setting token in localStorage:", error);
-        }
-      }
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("businessId", data.business_id);
+
+          // check if the business email is verified
+          if (data?.current_onboarding_step === BUSINESS_EMAIL_NOT_VERIFIED) {
+            return router.push(
+              `/application/${data?._id}/onboarding/email-not-verified`
+            );
+          }
+
+          // check if the survey is collected or not
+          if (data.current_onboarding_step === COLLECT_SURVEY) {
+            return router.push(`/application/${data?._id}/collect-survey`);
+          }
+
+          // redirect to dashboard
           return router.push(
             `/application/${data?._id}/${data?.business_id}/dashboard`
           );

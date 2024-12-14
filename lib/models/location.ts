@@ -18,7 +18,16 @@ const LocationSchema = new Schema(
       type: Number,
       default: 0,
     },
-    location_payment_intent_id: {
+    // Providers for location
+    platforms: {
+      type: Array<{
+        id: String;
+        name: String;
+        url: String;
+        total_reviews: Number;
+      }>,
+    },
+    location_subscription_id: {
       type: String,
       default: null,
     },

@@ -20,6 +20,10 @@ export interface IBusiness {
     max_reviews: string;
     max_locations: string;
   };
+  is_verified: boolean;
+  verify_token?: string;
+  verify_token_expire?: Date;
+  number_of_retries?: number;
 }
 
 export const INITIAL_BUSINESS_STATE: IBusiness = {
@@ -35,6 +39,7 @@ export const INITIAL_BUSINESS_STATE: IBusiness = {
     max_reviews: "",
     max_locations: "",
   },
+  is_verified: false,
 };
 
 const Context = createContext<{

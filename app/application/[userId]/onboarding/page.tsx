@@ -316,7 +316,9 @@ export default function Onboarding() {
           console.error("Error while setting token in localStorage:", error);
         }
         setBusiness(data);
-        return router.push(`/application/${data?._id}/collect-survey`);
+        return router.push(
+          `/application/${user?._id}/onboarding/email-not-verified`
+        );
       }
     } catch (err: any) {
       setError((error) => ({

@@ -8,9 +8,6 @@ import { cookies } from "next/headers";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTempelate";
 import { sendEmail } from "@/utils/sendEmail";
 import { IUser } from "@/context/userContext";
-import Plan from "@/lib/models/plan";
-import { Types } from "mongoose";
-import { PlanTypes } from "@/utils/planTypes";
 
 function getVerificationToken(user: IUser): string {
   // Generate the token

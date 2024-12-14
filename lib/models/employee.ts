@@ -14,7 +14,7 @@ const EmployeeSchema = new Schema(
       type: Number,
       default: 0,
     },
-    employee_payment_intent_id: {
+    employee_subscription_id: {
       type: String,
       default: null,
     },

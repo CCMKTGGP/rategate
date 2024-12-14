@@ -28,7 +28,7 @@ export const POST = async (req: NextRequest) => {
       const metadata = session.metadata?.data;
       const sessionData = JSON.parse(metadata || "");
 
-      const paymentIntentId = session.payment_intent as string; // Capture payment intent ID for one-time payments
+      const subscriptionId = session.subscription as string;
 
       if (
         sessionData?.type?.toLowerCase() ===
@@ -39,7 +39,7 @@ export const POST = async (req: NextRequest) => {
           // create the new location object
           const newLocation = new Location({
             ...sessionData?.data,
-            location_payment_intent_id: paymentIntentId,
+            location_subscription_id: subscriptionId,
           });
           await newLocation.save();
 

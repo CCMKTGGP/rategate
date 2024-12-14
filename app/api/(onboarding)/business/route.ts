@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Business from "@/lib/models/business";
 import User from "@/lib/models/user";
-import { COLLECT_SURVEY } from "@/constants/onboarding-constants";
+import { BUSINESS_EMAIL_NOT_VERIFIED } from "@/constants/onboarding-constants";
 import Plan from "@/lib/models/plan";
 import { PlanTypes } from "@/utils/planTypes";
+import { IBusiness } from "@/context/businessContext";
+import { verificationEmailTemplate } from "@/utils/verificationEmailTempelate";
+import { sendEmail } from "@/utils/sendEmail";
+
+function getVerificationToken(Business: IBusiness): string {
+  // Generate the token
+  const verificationToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash the token
+  Business.verify_token = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+
+  Business.verify_token_expire = new Date(Date.now() + 30 * 60 * 1000);
+  return verificationToken;
+}
 
 export const GET = async () => {
   try {
@@ -87,7 +105,7 @@ export const POST = async (request: Request) => {
       { _id: user._id },
       {
         business_id: new Types.ObjectId(newBusiness._id),
-        current_onboarding_step: COLLECT_SURVEY,
+        current_onboarding_step: BUSINESS_EMAIL_NOT_VERIFIED,
       },
       {
         new: true,
@@ -101,6 +119,16 @@ export const POST = async (request: Request) => {
         { status: 400 }
       );
     }
+
+    // generate a verification token for the user and save it in the database
+    const verificationToken = getVerificationToken(newBusiness);
+    await newBusiness.save();
+
+    const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/verify-business-email?verifyToken=${verificationToken}&user_id=${user?._id}&business_id=${newBusiness?._id}`;
+    const message = verificationEmailTemplate(verificationLink);
+
+    // Send verification email
+    await sendEmail(newBusiness?.email, "Email Verification", message);
 
     return new NextResponse(
       JSON.stringify({

@@ -45,7 +45,7 @@ export async function GET(reqeust: Request) {
 
     await user.save();
 
-    // redirect to the calendar dashboard with user id
+    // redirect to the onboarding steps with user id
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_BASE_URL}/application/${user?._id}/onboarding`
     );

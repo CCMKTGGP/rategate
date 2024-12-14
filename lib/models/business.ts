@@ -10,6 +10,19 @@ const BusinessSchema = new Schema(
       type: String,
       required: true,
     },
+    is_email_verified: {
+      type: Boolean,
+      default: false,
+    },
+    number_of_retries: {
+      type: Number,
+    },
+    verify_token: {
+      type: String,
+    },
+    verify_token_expire: {
+      type: Date,
+    },
     phone_number: {
       type: String,
     },
@@ -18,6 +31,7 @@ const BusinessSchema = new Schema(
         id: String;
         name: String;
         url: String;
+        total_reviews: Number;
       }>,
     },
     plan_id: {

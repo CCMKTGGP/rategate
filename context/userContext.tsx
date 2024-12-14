@@ -1,5 +1,6 @@
 "use client";
 import {
+  BUSINESS_EMAIL_NOT_VERIFIED,
   COLLECT_BUSINESS_INFO,
   COLLECT_SURVEY,
 } from "@/constants/onboarding-constants";
@@ -65,6 +66,11 @@ export function UserContext({ children }: { children: React.ReactNode }) {
           !authPathNames.includes(pathname)
         ) {
           return router.push(`/application/${data?._id}/onboarding`);
+        }
+        if (data?.current_onboarding_step === BUSINESS_EMAIL_NOT_VERIFIED) {
+          return router.push(
+            `/application/${data?._id}/onboarding/email-not-verified`
+          );
         }
         if (
           data.current_onboarding_step === COLLECT_SURVEY &&
