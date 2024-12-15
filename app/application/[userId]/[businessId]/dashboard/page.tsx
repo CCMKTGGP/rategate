@@ -12,13 +12,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ILocation } from "@/app/api/location/interface";
 import DeleteModal from "@/app/components/delete-modal";
+import ApiSuccess from "@/app/components/api-success";
 
 export default function Dashboard() {
   const router = useRouter();
   const { user } = useUserContext();
   const { business } = useBusinessContext();
   const [locations, setLocations] = useState<ILocation[]>([]);
-  const [deleteProductLoading, setDeleteProductLoading] = useState(false);
+  const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [successDeleteMessage, setSuccessDeleteMessage] = useState("");
   const [fetchLocationsLoading, setFetchLocationLoading] = useState(false);
   const [error, setError] = useState({
@@ -55,7 +56,7 @@ export default function Dashboard() {
 
   // delete location api call
   async function handleDeleteLocation(locationId: string) {
-    setDeleteProductLoading(true);
+    setDeleteLocationLoading(true);
     try {
       const response = await deleteData(`/api/location/${locationId}`);
       const { message } = response;
@@ -71,7 +72,7 @@ export default function Dashboard() {
         apiError: err.message,
       }));
     } finally {
-      setDeleteProductLoading(false);
+      setDeleteLocationLoading(false);
     }
   }
 
@@ -233,22 +234,27 @@ export default function Dashboard() {
                   <h4 className="text-lg leading-10 text-heading font-medium">
                     {`Review Platforms (${business?.platforms?.length})`}
                   </h4>
-                  <div className="mt-4 flex items-center gap-4 overflow-auto">
+                  <div className="mt-[34px] flex items-center gap-4 overflow-auto">
                     {business?.platforms.map((platform, index) => {
                       return (
                         <div
                           key={index}
-                          className="min-w-[150px] max-w-[150px] min-h-[160px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-6"
+                          className="min-w-[120px] max-w-[120px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
                         >
-                          <Image
-                            src={`/${platform.id}.svg`}
-                            alt={`Logo of ${platform.name}`}
-                            width={50}
-                            height={50}
-                            priority
-                          />
-                          <p className="text-sm leading-md text-heading text-center px-4">
-                            {platform.name}
+                          <div className="flex flex-col items-center gap-2">
+                            <Image
+                              src={`/${platform.id}.svg`}
+                              alt={`Logo of ${platform.name}`}
+                              width={40}
+                              height={40}
+                              priority
+                            />
+                            <p className="text-sm leading-md text-heading text-center px-2">
+                              {platform.name}
+                            </p>
+                          </div>
+                          <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                            {platform.total_reviews} Revies
                           </p>
                         </div>
                       );
@@ -288,6 +294,12 @@ export default function Dashboard() {
                 }
               />
             )}
+            {successDeleteMessage && (
+              <ApiSuccess
+                message={successDeleteMessage}
+                setMessage={(value) => setSuccessDeleteMessage(value)}
+              />
+            )}
             {renderLoadingOrTable()}
           </div>
         </div>
@@ -295,7 +307,7 @@ export default function Dashboard() {
           <DeleteModal
             heading="Delete Location"
             subHeading={`Are you sure you want to delete "${deleteModal.data.name}"? Please keep in mind that these changes will not be reverted`}
-            isLoading={deleteProductLoading}
+            isLoading={deleteLocationLoading}
             onCancel={() =>
               setDeleteModal({
                 toggle: false,

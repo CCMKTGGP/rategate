@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Location from "@/lib/models/location";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
 
 type Params = Promise<{ locationId: string }>;
 
@@ -130,6 +133,18 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
       return new NextResponse(
         JSON.stringify({ message: "Location does not exist!" }),
         { status: 400 }
+      );
+    }
+
+    // cancel subscription flow
+    try {
+      // Cancel the Stripe subscription
+      await stripe.subscriptions.cancel(location.location_subscription_id);
+      location.location_subscription_id = null;
+    } catch (error) {
+      return new NextResponse(
+        JSON.stringify({ message: "Failed to cancel subscription!" }),
+        { status: 500 }
       );
     }
 

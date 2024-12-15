@@ -32,6 +32,7 @@ export default function Onboarding() {
       id: string;
       name: string;
       url: string;
+      total_reviews: number;
     }>;
   }>({
     name: "",
@@ -209,6 +210,7 @@ export default function Onboarding() {
                           id,
                           name,
                           url: "",
+                          total_reviews: 0,
                         },
                       ];
                     }

@@ -51,7 +51,8 @@ export const GET = async (request: Request) => {
 export const POST = async (request: Request) => {
   try {
     // extract the request body from request
-    const { userId, businessId, name, address } = await request.json();
+    const { userId, businessId, name, address, platforms } =
+      await request.json();
 
     // check if the userId exist and is valid
     if (!userId || !Types.ObjectId.isValid(userId)) {
@@ -92,7 +93,7 @@ export const POST = async (request: Request) => {
 
     // create a one time payment subscription here.
     const priceId: string = process.env.STRIPE_PRICE_ID_LOCATION as string;
-    const mode: any = PAYMENT_CONSTANTS.PAYMENT_MODE as string;
+    const mode: any = PAYMENT_CONSTANTS.SUBSCRIPTION_MODE as string;
 
     // Metadata for Checkout session
     const metadata: any = {
@@ -101,6 +102,7 @@ export const POST = async (request: Request) => {
         data: {
           name,
           address,
+          platforms,
           total_reviews: 0,
           total_members: 0,
           business_id: businessId,

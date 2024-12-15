@@ -4,4 +4,10 @@ export interface ILocation {
   address?: string;
   total_reviews?: number;
   total_members?: number;
+  platforms?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    total_reviews: number;
+  }>;
 }

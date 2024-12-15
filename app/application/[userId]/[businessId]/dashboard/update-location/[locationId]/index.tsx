@@ -130,11 +130,9 @@ export default function EditLocationClient({
             </p>
           </div>
           {fetchingLocationDetails ? (
-            <div className="flex items-center mt-8">
-              <p className="text-lg font-medium text-subheading">
-                Fetching location details...
-              </p>
-            </div>
+            <p className="text-base leading-[24px] font-medium text-subHeading pt-6">
+              Fetching location Details...
+            </p>
           ) : (
             <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30">
               <div className="flex flex-col gap-4">
@@ -173,9 +171,7 @@ export default function EditLocationClient({
                     buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
                     buttonText="Cancel"
                     onClick={() => {
-                      router.push(
-                        `/application/${user?._id}/${business._id}/dashboard`
-                      );
+                      router.back();
                     }}
                   />
                   <Button

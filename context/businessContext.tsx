@@ -12,6 +12,7 @@ export interface IBusiness {
     id: string;
     name: string;
     url: string;
+    total_reviews: number;
   }>;
   plan: {
     _id: string;
