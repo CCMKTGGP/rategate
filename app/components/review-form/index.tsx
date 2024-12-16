@@ -71,6 +71,13 @@ export default function ReviewForm({
         setIsLoading(false);
       }
     }
+
+    if (businessId) {
+      getBusinessDetails();
+    }
+  }, [businessId]);
+
+  useEffect(() => {
     async function getLocationDetails() {
       try {
         const response = await fetchData(`/api/location/${locationId}`);
@@ -83,14 +90,10 @@ export default function ReviewForm({
       }
     }
 
-    if (businessId) {
-      getBusinessDetails();
-    }
-
     if (locationId) {
       getLocationDetails();
     }
-  }, [businessId]);
+  }, [locationId]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -189,7 +192,12 @@ export default function ReviewForm({
     }
   }
 
-  async function handlePostPositiveFeedback(url: string) {
+  async function handlePostPositiveFeedback(platform: {
+    id: string;
+    name: string;
+    url: string;
+    total_reviews: number;
+  }) {
     setPostReviewLoading(true);
     try {
       const response = await postData(`/api/review`, {
@@ -197,11 +205,12 @@ export default function ReviewForm({
         businessId,
         locationId,
         employeeId,
+        platform,
       });
       const { message } = response;
       setReviewSuccessMessage(message);
       setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
-      window.open(url, "_blank");
+      window.open(platform.url, "_blank");
     } catch (err: any) {
       setError((error) => ({
         ...error,
@@ -210,6 +219,17 @@ export default function ReviewForm({
     } finally {
       setPostReviewLoading(false);
     }
+  }
+
+  function getPlatformsBasedOnId() {
+    if (locationId) {
+      return (
+        location?.platforms?.filter((platform) => platform?.url !== "") || []
+      );
+    }
+    return (
+      business?.platforms?.filter((platform) => platform?.url !== "") || []
+    );
   }
 
   async function handlePostNegativeFeedback() {
@@ -328,30 +348,28 @@ export default function ReviewForm({
           </p>
         </div>
         <div className="flex items-center flex-wrap gap-4">
-          {business?.platforms
-            .filter((platform) => platform.url !== "")
-            .map((platform, index) => {
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  className="w-[150px] h-[150px] md:w-[250px] md:h-[200px] bg-white border border-stroke/20 rounded-[12px] shadow-card flex flex-col items-center justify-center gap-6"
-                  onClick={() => handlePostPositiveFeedback(platform.url)}
-                  disabled={postReviewLoading}
-                >
-                  <Image
-                    src={`/${platform.id}.svg`}
-                    alt={`Logo of ${platform.name}`}
-                    width={50}
-                    height={50}
-                    priority
-                  />
-                  <p className="text-sm md:text-base leading-md text-heading">
-                    {platform.name}
-                  </p>
-                </button>
-              );
-            })}
+          {getPlatformsBasedOnId()?.map((platform, index) => {
+            return (
+              <button
+                key={index}
+                type="button"
+                className="w-[150px] h-[150px] md:w-[200px] md:h-[200px] bg-white border border-stroke/20 rounded-[12px] shadow-card flex flex-col items-center justify-center gap-6"
+                onClick={() => handlePostPositiveFeedback(platform)}
+                disabled={postReviewLoading}
+              >
+                <Image
+                  src={`/${platform.id}.svg`}
+                  alt={`Logo of ${platform.name}`}
+                  width={50}
+                  height={50}
+                  priority
+                />
+                <p className="text-sm md:text-base leading-md text-heading">
+                  {platform.name}
+                </p>
+              </button>
+            );
+          })}
         </div>
         {postReviewLoading && (
           <p className="text-base leading-6 text-subHeading">
@@ -671,6 +689,44 @@ export default function ReviewForm({
               Your business has maxed out the free reviews on basic plan. Please
               subscribe to a plan to get more reviews.
             </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (getPlatformsBasedOnId()?.length <= 0) {
+    return (
+      <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
+        <div className="py-4">
+          <Image
+            src="/logo.png"
+            alt="Logo of Rategate"
+            className="h-8"
+            width={135}
+            height={50}
+            priority
+          />
+        </div>
+        <div className="py-6 flex flex-col gap-8">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
+              No Providers Registered for the business
+            </h2>
+            <p className="text-base leading-6 text-subHeading">
+              With the given url, there is no business registered in our
+              database. Follow this link to update the providers for your
+              account at Rategate.
+            </p>
+          </div>
+          <div className="flex flex-start">
+            <Button
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+              buttonText="Update Now"
+              onClick={() => {
+                router.push("/");
+              }}
+            />
           </div>
         </div>
       </main>

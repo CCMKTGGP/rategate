@@ -5,6 +5,8 @@ import Button from "@/app/components/button";
 import DeleteModal from "@/app/components/delete-modal";
 import Sidebar from "@/app/components/sidebar";
 import TopBar from "@/app/components/topbar";
+import UpdatePlatforms from "@/app/components/update-platform";
+import { PLATFORM_TYPES } from "@/app/components/update-platform/interface";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { deleteData, fetchData } from "@/utils/fetch";
@@ -24,7 +26,8 @@ export default function ViewLocationClient({
 
   const [state, setState] = useState<ILocation>({});
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
+  const [toggleUpdatePlatformModel, setToggleUpdatePlatformModel] =
+    useState(false);
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [_, setSuccessDeleteMessage] = useState("");
   const [error, setError] = useState({
@@ -126,8 +129,8 @@ export default function ViewLocationClient({
                 </div>
                 <div className="my-4 flex items-center gap-4 ml-auto">
                   <Button
-                    buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
-                    buttonText="Edit Location"
+                    buttonClassName="px-4 py-2 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
+                    buttonText="Edit"
                     onClick={() => {
                       router.push(
                         `/application/${user._id}/${business._id}/dashboard/update-location/${_id}`
@@ -135,8 +138,8 @@ export default function ViewLocationClient({
                     }}
                   />
                   <Button
-                    buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-error text-white"
-                    buttonText="Delete Location"
+                    buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#FDE4E4] text-[#913838] px-4 py-2"
+                    buttonText="Delete"
                     onClick={() =>
                       setDeleteModal({
                         toggle: true,
@@ -184,9 +187,22 @@ export default function ViewLocationClient({
                 </div>
                 <div className="w-[57%]">
                   <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
-                    <h4 className="text-lg leading-10 text-heading font-medium">
-                      {`Review Platforms (${platforms?.length})`}
-                    </h4>
+                    <div className="flex items-center">
+                      <h4 className="text-lg leading-10 text-heading font-medium">
+                        {`Review Platforms (${platforms?.length})`}
+                      </h4>
+                      <div className="ml-auto">
+                        <button
+                          type="button"
+                          className="bg-transparent border-0 font-bold text-base text-primary"
+                          onClick={() => {
+                            setToggleUpdatePlatformModel(true);
+                          }}
+                        >
+                          Edit Platforms
+                        </button>
+                      </div>
+                    </div>
                     <div className="mt-[34px] flex items-center gap-4 overflow-auto">
                       {platforms?.map((platform, index) => {
                         return (
@@ -263,6 +279,15 @@ export default function ViewLocationClient({
               })
             }
             onConfirm={() => handleDeleteLocation(deleteModal.data._id || "")}
+          />
+        )}
+        {toggleUpdatePlatformModel && (
+          <UpdatePlatforms
+            locationId={_id}
+            type={PLATFORM_TYPES.LOCATION}
+            platforms={platforms || []}
+            onCancel={() => setToggleUpdatePlatformModel(false)}
+            onConfirm={() => window.location.reload()}
           />
         )}
       </div>

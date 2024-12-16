@@ -1,4 +1,5 @@
 "use client";
+import { IPlatform } from "@/app/api/location/interface";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
 import Input from "@/app/components/input";
@@ -24,14 +25,7 @@ export default function AddLocation() {
   const [currentStep, setCurrentStep] = useState(COLLECT_LOCATION_INFO);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [platforms, setPlatforms] = useState<
-    Array<{
-      id: string;
-      name: string;
-      url: string;
-      total_reviews: number;
-    }>
-  >([]);
+  const [platforms, setPlatforms] = useState<Array<IPlatform>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
     nameError: "",
@@ -77,7 +71,9 @@ export default function AddLocation() {
 
   async function handleAddLocation() {
     // check whether all the urls added are in correct format
-    const validUrls = platforms.filter((platform) => platform.url.trim());
+    const validUrls = platforms.filter((platform: IPlatform) =>
+      platform.url.trim()
+    );
     const invalidUrls = validUrls.filter(
       (platform) => !isValidURL(platform.url)
     );

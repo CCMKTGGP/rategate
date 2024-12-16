@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 import Review from "@/lib/models/review";
 import Business from "@/lib/models/business";
 import Plan from "@/lib/models/plan";
+import Location from "@/lib/models/location";
 
 // get all reviews for a business.
 export const GET = async (request: Request) => {
@@ -54,7 +55,7 @@ export const GET = async (request: Request) => {
 export const POST = async (request: Request) => {
   try {
     // extract the request body from request
-    const { rating, feedback, provider, businessId, locationId, employeeId } =
+    const { rating, feedback, businessId, locationId, employeeId, platform } =
       await request.json();
 
     // check if the businessId exist and is valid
@@ -110,12 +111,80 @@ export const POST = async (request: Request) => {
     const newReview = new Review({
       rating,
       feedback: feedback ? feedback : null,
-      provider: provider ? provider : null,
       location_id: locationId ? new Types.ObjectId(locationId) : null,
       employee_id: employeeId ? new Types.ObjectId(employeeId) : null,
       business_id: new Types.ObjectId(business._id),
     });
     await newReview.save();
+
+    // if no location id exists then update the platform of the business
+    if (!locationId) {
+      // loop through all the platforms of the business
+      const updatedPlatforms = business.platforms.map((p: any) => {
+        if (p.id === platform.id) {
+          p.total_reviews += 1;
+          return p;
+        }
+        return p;
+      });
+      // update the users table with the new business id
+      const updatedBusiness = await Business.findOneAndUpdate(
+        { _id: businessId },
+        {
+          platforms: updatedPlatforms,
+        },
+        {
+          new: true,
+        }
+      );
+
+      // check if the process successed
+      if (!updatedBusiness) {
+        return new NextResponse(
+          JSON.stringify({ message: "Business not updated!" }),
+          { status: 400 }
+        );
+      }
+    }
+
+    // if the review is for a location than update the total reviews for the provider of the location
+    if (locationId) {
+      // find if the location exists in our database
+      const location = await Location.findById(locationId);
+      if (!location) {
+        return new NextResponse(
+          JSON.stringify({ message: "Location does not exist!" }),
+          { status: 400 }
+        );
+      }
+      // loop through all the platforms of the location
+      const updatedPlatforms = location.platforms.map((p: any) => {
+        if (p.id === platform.id) {
+          p.total_reviews += 1;
+          return p;
+        }
+        return p;
+      });
+      // update the users table with the new business id
+      const updatedLocation = await Location.findOneAndUpdate(
+        { _id: locationId },
+        {
+          platforms: updatedPlatforms,
+          total_reviews: location.total_reviews + 1,
+        },
+        {
+          new: true,
+        }
+      );
+
+      // check if the process successed
+      if (!updatedLocation) {
+        return new NextResponse(
+          JSON.stringify({ message: "Location not updated!" }),
+          { status: 400 }
+        );
+      }
+    }
 
     return new NextResponse(
       JSON.stringify({

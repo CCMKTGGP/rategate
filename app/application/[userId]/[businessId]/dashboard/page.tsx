@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { ILocation } from "@/app/api/location/interface";
 import DeleteModal from "@/app/components/delete-modal";
 import ApiSuccess from "@/app/components/api-success";
+import UpdatePlatforms from "@/app/components/update-platform";
+import { PLATFORM_TYPES } from "@/app/components/update-platform/interface";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -22,6 +24,8 @@ export default function Dashboard() {
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [successDeleteMessage, setSuccessDeleteMessage] = useState("");
   const [fetchLocationsLoading, setFetchLocationLoading] = useState(false);
+  const [toggleUpdatePlatformModel, setToggleUpdatePlatformModel] =
+    useState(false);
   const [error, setError] = useState({
     apiError: "",
   });
@@ -231,9 +235,22 @@ export default function Dashboard() {
               </div>
               <div className="w-[57%]">
                 <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
-                  <h4 className="text-lg leading-10 text-heading font-medium">
-                    {`Review Platforms (${business?.platforms?.length})`}
-                  </h4>
+                  <div className="flex items-center">
+                    <h4 className="text-lg leading-10 text-heading font-medium">
+                      {`Review Platforms (${business?.platforms?.length})`}
+                    </h4>
+                    <div className="ml-auto">
+                      <button
+                        type="button"
+                        className="bg-transparent border-0 font-bold text-base text-primary"
+                        onClick={() => {
+                          setToggleUpdatePlatformModel(true);
+                        }}
+                      >
+                        Edit Platforms
+                      </button>
+                    </div>
+                  </div>
                   <div className="mt-[34px] flex items-center gap-4 overflow-auto">
                     {business?.platforms.map((platform, index) => {
                       return (
@@ -315,6 +332,15 @@ export default function Dashboard() {
               })
             }
             onConfirm={() => handleDeleteLocation(deleteModal.data._id || "")}
+          />
+        )}
+        {toggleUpdatePlatformModel && (
+          <UpdatePlatforms
+            businessId={business._id}
+            type={PLATFORM_TYPES.BUSINESS}
+            platforms={business.platforms}
+            onCancel={() => setToggleUpdatePlatformModel(false)}
+            onConfirm={() => window.location.reload()}
           />
         )}
       </div>

@@ -1,4 +1,5 @@
 "use client";
+import { IPlatform } from "@/app/api/location/interface";
 import { fetchData } from "@/utils/fetch";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -8,12 +9,7 @@ export interface IBusiness {
   name: string;
   email: string;
   phone_number: string;
-  platforms: Array<{
-    id: string;
-    name: string;
-    url: string;
-    total_reviews: number;
-  }>;
+  platforms: Array<IPlatform>;
   plan: {
     _id: string;
     plan_id: string;

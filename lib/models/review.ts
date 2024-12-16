@@ -9,9 +9,6 @@ const ReviewSchema = new Schema(
     feedback: {
       type: String,
     },
-    provider: {
-      type: String,
-    },
     business_id: {
       type: Schema.Types.ObjectId,
       ref: "Business",

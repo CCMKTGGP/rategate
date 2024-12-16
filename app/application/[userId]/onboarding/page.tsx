@@ -1,4 +1,5 @@
 "use client";
+import { IPlatform } from "@/app/api/location/interface";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
 import Input from "@/app/components/input";
@@ -28,12 +29,7 @@ export default function Onboarding() {
     name: string;
     email: string;
     phoneNumber: string;
-    platforms: Array<{
-      id: string;
-      name: string;
-      url: string;
-      total_reviews: number;
-    }>;
+    platforms: Array<IPlatform>;
   }>({
     name: "",
     email: "",
@@ -283,7 +279,9 @@ export default function Onboarding() {
 
   async function handleCreateBusiness() {
     // check whether all the urls added are in correct format
-    const validUrls = platforms.filter((platform) => platform.url.trim());
+    const validUrls = platforms.filter((platform: IPlatform) =>
+      platform.url.trim()
+    );
     const invalidUrls = validUrls.filter(
       (platform) => !isValidURL(platform.url)
     );
