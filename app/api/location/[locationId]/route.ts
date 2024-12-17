@@ -3,6 +3,7 @@ import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Location from "@/lib/models/location";
 import Stripe from "stripe";
+import Employee from "@/lib/models/employee";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
 
@@ -136,9 +137,30 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
       );
     }
 
-    // cancel subscription flow
+    // get all the employees present in the database for a location id
+    const employees = await Employee.find({
+      location_id: new Types.ObjectId(locationId),
+    });
+
+    // Cancel Stripe subscriptions for each employee
+    for (const employee of employees) {
+      if (employee.employee_subscription_id) {
+        try {
+          // Cancel the subscription using the employee's subscription ID
+          await stripe.subscriptions.cancel(employee.employee_subscription_id);
+          employee.employee_subscription_id = null;
+          await employee.save();
+        } catch (error) {
+          console.error(
+            `Failed to cancel subscription for employee ${employee._id}:`,
+            error
+          );
+        }
+      }
+    }
+
+    // Cancel the Stripe subscription for the location
     try {
-      // Cancel the Stripe subscription
       await stripe.subscriptions.cancel(location.location_subscription_id);
       location.location_subscription_id = null;
     } catch (error) {
