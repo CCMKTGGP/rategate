@@ -14,9 +14,7 @@ export default function Button(props: IButtonProps) {
   return (
     <button
       type="button"
-      className={`font-inter font-medium flex items-center gap-4 px-8 py-3 transition-all ${buttonClassName} ${
-        isLoading ? "bg-transparent" : ""
-      }`}
+      className={`font-inter font-medium flex items-center gap-4 px-8 py-3 transition-all ${buttonClassName}`}
       disabled={isDisabled || isLoading}
       onClick={onClick}
     >

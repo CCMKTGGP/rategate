@@ -1,62 +1,61 @@
 "use client";
+import { IEmployee } from "@/app/api/employee/interface";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
 import Input from "@/app/components/input";
 import Sidebar from "@/app/components/sidebar";
 import TopBar from "@/app/components/topbar";
-import { useBusinessContext } from "@/context/businessContext";
-import { useUserContext } from "@/context/userContext";
 import { fetchData, putData } from "@/utils/fetch";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function EditLocationClient({
-  locationId,
+export default function EditEmployeeClient({
+  employeeId,
 }: {
-  locationId: string;
+  employeeId: string;
 }) {
   const router = useRouter();
-  const { user } = useUserContext();
-  const { business } = useBusinessContext();
 
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
+  const [fetchEmployeeDetailsLoading, setFetchEmployeeDetailsLoading] =
+    useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState<IEmployee>({
+    name: "",
+    employee_id: "",
+  });
   const [error, setError] = useState({
     nameError: "",
-    addressError: "",
+    employeeIdError: "",
     getApiError: "",
     putApiError: "",
   });
+  const { name, employee_id } = state;
 
   useEffect(() => {
     async function getLocationDetails() {
       try {
-        const { data } = await fetchData(`/api/location/${locationId}`);
-        setName(data.name);
-        setAddress(data.address);
+        const { data } = await fetchData(`/api/employee/${employeeId}`);
+        setState(data);
       } catch (err: any) {
         setError((error) => ({
           ...error,
           getApiError: err.message,
         }));
       } finally {
-        setFetchingLocationDetails(false);
+        setFetchEmployeeDetailsLoading(false);
       }
     }
-    if (locationId) {
-      setFetchingLocationDetails(true);
+    if (employeeId) {
+      setFetchEmployeeDetailsLoading(true);
       getLocationDetails();
     }
-  }, [locationId]);
+  }, [employeeId]);
 
-  function checkLocationName() {
+  function checkEmployeeName() {
     if (!name) {
       setError((error) => ({
         ...error,
-        nameError: "Location Name is required",
+        nameError: "Employee Name is required",
       }));
       return false;
     }
@@ -67,37 +66,33 @@ export default function EditLocationClient({
     return true;
   }
 
-  function checkAddress() {
-    if (!address) {
+  function checkEmployeeId() {
+    if (!employee_id) {
       setError((error) => ({
         ...error,
-        addressError: "Address is required",
+        employeeIdError: "Employee Id is required",
       }));
       return false;
     }
     setError((error) => ({
       ...error,
-      addressError: "",
+      employeeIdError: "",
     }));
     return true;
   }
 
-  async function handleUpdateLocation() {
-    const ALL_CHECKS_PASS = [checkLocationName(), checkAddress()].every(
-      Boolean
-    );
-    if (!ALL_CHECKS_PASS) return;
+  async function handleUpdateEmployee() {
     setIsLoading(true);
     try {
-      const response = await putData(`/api/location/${locationId}`, {
+      const response = await putData(`/api/employee/${employeeId}`, {
         data: {
           name,
-          address,
+          employee_id,
         },
       });
       const { message } = response;
       console.log(message);
-      router.push(`/application/${user?._id}/${business._id}/dashboard`);
+      router.back();
     } catch (err: any) {
       setError((error) => ({
         ...error,
@@ -114,19 +109,20 @@ export default function EditLocationClient({
         <TopBar />
         <div className="px-8 py-4">
           <div className="my-2">
-            <Link
-              href={`/application/${user?._id}/${business._id}/dashboard`}
+            <button
+              type="button"
               className="text-heading underline font-medium text-md leading-md"
+              onClick={() => router.back()}
             >
-              Dashboard
-            </Link>
+              Location Details
+            </button>
           </div>
           <div className="flex flex-col pb-8">
             <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
-              Update Location
+              Update Employee
             </h3>
             <p className="text-base leading-[24px] font-medium text-subHeading ">
-              Update your location
+              Update your employee
             </p>
           </div>
           {error.getApiError && (
@@ -140,29 +136,39 @@ export default function EditLocationClient({
               }
             />
           )}
-          {fetchingLocationDetails ? (
+          {fetchEmployeeDetailsLoading ? (
             <p className="text-base leading-[24px] font-medium text-subHeading pt-6">
-              Fetching location Details...
+              Fetching employee Details...
             </p>
-          ) : name && address ? (
+          ) : state._id ? (
             <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30">
               <div className="flex flex-col gap-4">
                 <Input
                   type="text"
-                  label="Location Name"
+                  label="Employee Name"
                   value={name}
-                  placeholder="Enter name of the location"
-                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Enter name of the employee"
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      name: event.target.value,
+                    }))
+                  }
                   error={error.nameError}
                   disabled={isLoading}
                 />
                 <Input
                   type="text"
-                  label="Location Address"
-                  value={address}
-                  placeholder="Enter your full address"
-                  onChange={(event) => setAddress(event.target.value)}
-                  error={error.addressError}
+                  label="Employee Id"
+                  value={employee_id}
+                  placeholder="Enter the employee ID"
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      employee_id: event.target.value,
+                    }))
+                  }
+                  error={error.employeeIdError}
                   disabled={isLoading}
                 />
                 {error.putApiError && (
@@ -181,16 +187,21 @@ export default function EditLocationClient({
                     isDisabled={isLoading}
                     buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
                     buttonText="Cancel"
-                    onClick={() => {
-                      router.back();
-                    }}
+                    onClick={() => router.back()}
                   />
                   <Button
                     isDisabled={isLoading}
                     isLoading={isLoading}
                     buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-                    buttonText="Update Location"
-                    onClick={() => handleUpdateLocation()}
+                    buttonText="Update Team Member"
+                    onClick={() => {
+                      const ALL_CHECKS_PASS = [
+                        checkEmployeeName(),
+                        checkEmployeeId(),
+                      ].every(Boolean);
+                      if (!ALL_CHECKS_PASS) return;
+                      handleUpdateEmployee();
+                    }}
                   />
                 </div>
               </div>

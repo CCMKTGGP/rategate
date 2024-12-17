@@ -1,5 +1,6 @@
 import { SUBSCRIPTION_TYPES } from "@/constants/subscription_types";
 import connect from "@/lib/db";
+import Employee from "@/lib/models/employee";
 import Location from "@/lib/models/location";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -52,7 +53,53 @@ export const POST = async (req: NextRequest) => {
               status: 201,
             }
           );
-        } catch (err) {}
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      // if the type is for employee
+      if (
+        sessionData?.type?.toLowerCase() ===
+        SUBSCRIPTION_TYPES.ADD_EMPLOYEE.toLowerCase()
+      ) {
+        try {
+          console.log(sessionData?.data);
+          // find the location based on the locationId in the metadata
+          const locationId = sessionData?.data?.location_id;
+          await connect();
+          const location = await Location.findById(locationId);
+
+          if (!location) {
+            return new NextResponse(
+              JSON.stringify({ message: "Location does not exist!" }),
+              { status: 400 }
+            );
+          }
+
+          // create the new employee object
+          const newEmployee = new Employee({
+            ...sessionData?.data,
+            employee_subscription_id: subscriptionId,
+          });
+          await newEmployee.save();
+
+          // update the total members in the location
+          location.total_members += 1;
+          await location.save();
+
+          return new NextResponse(
+            JSON.stringify({
+              message: "Employee created successfully!",
+              data: newEmployee,
+            }),
+            {
+              status: 201,
+            }
+          );
+        } catch (err) {
+          console.log(err);
+        }
       }
       break;
     // case "customer.subscription.created":

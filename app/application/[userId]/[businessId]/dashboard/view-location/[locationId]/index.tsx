@@ -1,4 +1,5 @@
 "use client";
+import { IEmployee } from "@/app/api/employee/interface";
 import { ILocation } from "@/app/api/location/interface";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
@@ -13,7 +14,7 @@ import { deleteData, fetchData } from "@/utils/fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 export default function ViewLocationClient({
   locationId,
@@ -25,34 +26,50 @@ export default function ViewLocationClient({
   const { business } = useBusinessContext();
 
   const [state, setState] = useState<ILocation>({});
+  const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [fetchEmployeesLoading, setFetchEmployeesLoading] = useState(false);
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
   const [toggleUpdatePlatformModel, setToggleUpdatePlatformModel] =
     useState(false);
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
+  const [deleteEmployeeLoading, setDeleteEmployeeLoading] = useState(false);
   const [_, setSuccessDeleteMessage] = useState("");
   const [error, setError] = useState({
     nameError: "",
     addressError: "",
-    getApiError: "",
-    putApiError: "",
+    fetchLocationDetailsError: "",
+    fetchMembersError: "",
   });
-  const [deleteModal, setDeleteModal] = useState<{
+  const [deleteLocationModel, setDeleteLocationModel] = useState<{
     toggle: boolean;
     data: ILocation;
   }>({
     toggle: false,
     data: {},
   });
+  const [deleteEmployeeModel, setDeleteEmployeeModel] = useState<{
+    toggle: boolean;
+    data: IEmployee;
+  }>({
+    toggle: false,
+    data: {},
+  });
 
+  // extract the state here.
+  const { _id, name, address, platforms } = state;
+
+  // fetch location details in useEffect hook. This way, we only fetch when locationId changes.
   useEffect(() => {
     async function getLocationDetails() {
       try {
         const { data } = await fetchData(`/api/location/${locationId}`);
         setState(data);
+        setFetchEmployeesLoading(true);
+        fetchEmployeesForLocation(locationId);
       } catch (err: any) {
         setError((error) => ({
           ...error,
-          getApiError: err.message,
+          fetchLocationDetailsError: err.message,
         }));
       } finally {
         setFetchingLocationDetails(false);
@@ -64,8 +81,21 @@ export default function ViewLocationClient({
     }
   }, [locationId]);
 
-  // extract the state here.
-  const { _id, name, address, platforms } = state;
+  // fetch all employees for a location
+  const fetchEmployeesForLocation = useCallback(async (locationId: string) => {
+    console.log(_id);
+    try {
+      const response = await fetchData(
+        `/api/employee?locationId=${locationId}`
+      );
+      const { data } = response;
+      setEmployees(data);
+    } catch (err: any) {
+      setError((error) => ({ ...error, fetchMembersError: err.message }));
+    } finally {
+      setFetchEmployeesLoading(false);
+    }
+  }, []);
 
   async function handleDeleteLocation(locationId: string) {
     setDeleteLocationLoading(true);
@@ -73,7 +103,7 @@ export default function ViewLocationClient({
       const response = await deleteData(`/api/location/${locationId}`);
       const { message } = response;
       setSuccessDeleteMessage(message);
-      setDeleteModal({
+      setDeleteLocationModel({
         toggle: false,
         data: {},
       });
@@ -86,6 +116,123 @@ export default function ViewLocationClient({
     } finally {
       setDeleteLocationLoading(false);
     }
+  }
+
+  async function handleDeleteEmployee(employeeId: string) {
+    setDeleteEmployeeLoading(true);
+    try {
+      const response = await deleteData(`/api/employee/${employeeId}`, {
+        locationId: _id,
+      });
+      const { message } = response;
+      setSuccessDeleteMessage(message);
+      setDeleteEmployeeModel({
+        toggle: false,
+        data: {},
+      });
+      router.push(`/application/${user?._id}/${business._id}/dashboard`);
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setDeleteEmployeeLoading(false);
+    }
+  }
+
+  function renderLoadingOrTable() {
+    if (fetchEmployeesLoading) {
+      return (
+        <p className="text-base leading-[24px] font-medium text-subHeading pt-6">
+          Fetching employees...
+        </p>
+      );
+    }
+
+    if (employees?.length <= 0) {
+      return (
+        <p className="text-base leading-[24px] font-medium text-subHeading pt-4">
+          No Employee Found. Please create one.
+        </p>
+      );
+    }
+
+    return (
+      <table className="mt-8 table">
+        <thead>
+          <tr className="rounded-[12px] border border-stroke/60">
+            <th className="text-sm leading-4 w-[30%] text-left font-medium text-subHeading p-4">
+              Employee Name
+            </th>
+            <th className="text-sm leading-4 w-[30%] text-left font-medium text-subHeading p-4">
+              Employee Id
+            </th>
+            <th className="text-sm leading-4 w-[25%] text-left font-medium text-subHeading p-4">
+              Total Reviews
+            </th>
+            <th className="text-sm leading-4 w-[15%] text-left font-medium text-subHeading p-4">
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees?.map((employee: IEmployee) => {
+            return (
+              <tr
+                key={employee._id}
+                className="rounded-[12px] border border-stroke/60 group"
+              >
+                <td className="text-base leading-6 w-[30%] text-left font-medium text-subHeading p-4">
+                  {employee.name}
+                </td>
+                <td className="text-base leading-6 w-[30%] text-left font-medium text-subHeading p-4">
+                  {employee.employee_id}
+                </td>
+                <td className="text-base leading-6 w-[25%] text-left font-medium text-subHeading p-4">
+                  {employee.total_reviews}
+                </td>
+                <td className="text-base leading-6 w-[15%] text-left font-medium text-subHeading p-2">
+                  <div className="hidden group-hover:block">
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="w-8 h-8 rounded-full flex items-center justify-center bg-primary"
+                        onClick={() =>
+                          router.push(
+                            `/application/${user._id}/${business._id}/dashboard/view-location/${_id}/update-employee/${employee._id}`
+                          )
+                        }
+                      >
+                        <img
+                          src="/Edit.svg"
+                          alt="Edit Icon for location"
+                          className="w-[16px]"
+                        />
+                      </button>
+                      <button
+                        className="w-8 h-8 rounded-full flex items-center justify-center bg-error"
+                        onClick={() =>
+                          setDeleteEmployeeModel({
+                            toggle: true,
+                            data: employee,
+                          })
+                        }
+                      >
+                        <img
+                          src="/Delete.svg"
+                          alt="Delete Icon for location"
+                          className="w-[16px]"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
   }
 
   return (
@@ -102,21 +249,22 @@ export default function ViewLocationClient({
               Dashboard
             </Link>
           </div>
+          {error.fetchLocationDetailsError && (
+            <ApiError
+              message={error.fetchLocationDetailsError}
+              setMessage={(value) =>
+                setError((error) => ({
+                  ...error,
+                  fetchLocationDetailsError: value,
+                }))
+              }
+            />
+          )}
           {fetchingLocationDetails ? (
             <p className="text-base leading-[24px] font-medium text-subHeading pt-6">
               Fetching location Details...
             </p>
-          ) : error.getApiError !== "" ? (
-            <ApiError
-              message={error.putApiError}
-              setMessage={(value) =>
-                setError((error) => ({
-                  ...error,
-                  getApiError: value,
-                }))
-              }
-            />
-          ) : (
+          ) : _id ? (
             <div className="flex flex-col pb-12">
               <div className="flex items-center">
                 <div>
@@ -141,7 +289,7 @@ export default function ViewLocationClient({
                     buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#FDE4E4] text-[#913838] px-4 py-2"
                     buttonText="Delete"
                     onClick={() =>
-                      setDeleteModal({
+                      setDeleteLocationModel({
                         toggle: true,
                         data: state,
                       })
@@ -233,18 +381,18 @@ export default function ViewLocationClient({
                 </div>
               </div>
             </div>
-          )}
-          {/* <div className="flex flex-col pb-12">
+          ) : null}
+          <div className="flex flex-col pb-12">
             <div className="flex items-center gap-4 mb-4">
               <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
-                Locations
+                Team Members
               </h3>
               <Button
                 buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
-                buttonText="Add Location"
+                buttonText="Add Team Member"
                 onClick={() => {
                   router.push(
-                    `/application/${user._id}/${business._id}/dashboard/add-location`
+                    `/application/${user._id}/${business._id}/dashboard/view-location/${_id}/add-employee`
                   );
                 }}
               />
@@ -253,32 +401,50 @@ export default function ViewLocationClient({
               This would be a one line description of what to expect on this
               page
             </p>
-            {error.apiError && (
+            {error.fetchMembersError && (
               <ApiError
-                message={error.apiError}
+                message={error.fetchMembersError}
                 setMessage={(value) =>
                   setError((error) => ({
                     ...error,
-                    apiError: value,
+                    fetchMembersError: value,
                   }))
                 }
               />
             )}
             {renderLoadingOrTable()}
-          </div> */}
+          </div>
         </div>
-        {deleteModal.toggle && (
+        {deleteLocationModel.toggle && (
           <DeleteModal
             heading="Delete Location"
-            subHeading={`Are you sure you want to delete "${deleteModal.data.name}"? Please keep in mind that these changes will not be reverted`}
+            subHeading={`Are you sure you want to delete "${deleteLocationModel.data.name}"? Please keep in mind that these changes will not be reverted`}
             isLoading={deleteLocationLoading}
             onCancel={() =>
-              setDeleteModal({
+              setDeleteLocationModel({
                 toggle: false,
                 data: {},
               })
             }
-            onConfirm={() => handleDeleteLocation(deleteModal.data._id || "")}
+            onConfirm={() =>
+              handleDeleteLocation(deleteLocationModel.data._id || "")
+            }
+          />
+        )}
+        {deleteEmployeeModel.toggle && (
+          <DeleteModal
+            heading="Delete Employee"
+            subHeading={`Are you sure you want to delete "${deleteEmployeeModel.data.name}"? Please keep in mind that these changes will not be reverted`}
+            isLoading={deleteEmployeeLoading}
+            onCancel={() =>
+              setDeleteEmployeeModel({
+                toggle: false,
+                data: {},
+              })
+            }
+            onConfirm={() =>
+              handleDeleteEmployee(deleteEmployeeModel.data._id || "")
+            }
           />
         )}
         {toggleUpdatePlatformModel && (
