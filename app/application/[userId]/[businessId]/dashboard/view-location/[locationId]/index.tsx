@@ -10,11 +10,11 @@ import UpdatePlatforms from "@/app/components/update-platform";
 import { PLATFORM_TYPES } from "@/app/components/update-platform/interface";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
-import { deleteData, fetchData } from "@/utils/fetch";
+import { deleteData, fetchData, postData } from "@/utils/fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export default function ViewLocationClient({
   locationId,
@@ -25,12 +25,23 @@ export default function ViewLocationClient({
   const { user } = useUserContext();
   const { business } = useBusinessContext();
 
+  const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [state, setState] = useState<ILocation>({});
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [fetchEmployeesLoading, setFetchEmployeesLoading] = useState(false);
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
   const [toggleUpdatePlatformModel, setToggleUpdatePlatformModel] =
     useState(false);
+  const [downloadLocationQrCodeLoading, setDownloadLocationQrCodeLoading] =
+    useState(false);
+  const [downloadEmployeeQrCodeLoading, setDownloadEmployeeQrCodeLoading] =
+    useState<{
+      loading: boolean;
+      employeeId: string;
+    }>({
+      loading: false,
+      employeeId: "",
+    });
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [deleteEmployeeLoading, setDeleteEmployeeLoading] = useState(false);
   const [_, setSuccessDeleteMessage] = useState("");
@@ -83,7 +94,6 @@ export default function ViewLocationClient({
 
   // fetch all employees for a location
   const fetchEmployeesForLocation = useCallback(async (locationId: string) => {
-    console.log(_id);
     try {
       const response = await fetchData(
         `/api/employee?locationId=${locationId}`
@@ -141,6 +151,58 @@ export default function ViewLocationClient({
     }
   }
 
+  // download QR code
+  async function handleDownloadLocationQrCode() {
+    setDownloadLocationQrCodeLoading(true);
+    try {
+      const response = await postData("/api/generate-qr-code", {
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+      });
+      const { data } = response;
+      const ref: any = downloadQrCodeRef?.current;
+      ref.href = data.qrCodeUrl;
+      ref.download = `${business.name}_location_${name}_qr_code.png`;
+      ref.click();
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setDownloadLocationQrCodeLoading(false);
+    }
+  }
+
+  // download employee QR code
+  async function handleDownloadEmployeeQrCode(employee: IEmployee) {
+    setDownloadEmployeeQrCodeLoading((prev) => ({
+      ...prev,
+      loading: true,
+      employeeId: employee._id || "",
+    }));
+    try {
+      const response = await postData("/api/generate-qr-code", {
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}/${employee._id}`,
+      });
+      const { data } = response;
+      const ref: any = downloadQrCodeRef?.current;
+      ref.href = data.qrCodeUrl;
+      ref.download = `${business.name}_location_${name}_employee_${employee.name}_qr_code.png`;
+      ref.click();
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setDownloadEmployeeQrCodeLoading((prev) => ({
+        ...prev,
+        loading: false,
+        employeeId: "",
+      }));
+    }
+  }
+
   function renderLoadingOrTable() {
     if (fetchEmployeesLoading) {
       return (
@@ -162,14 +224,17 @@ export default function ViewLocationClient({
       <table className="mt-8 table">
         <thead>
           <tr className="rounded-[12px] border border-stroke/60">
-            <th className="text-sm leading-4 w-[30%] text-left font-medium text-subHeading p-4">
+            <th className="text-sm leading-4 w-[25%] text-left font-medium text-subHeading p-4">
               Employee Name
             </th>
             <th className="text-sm leading-4 w-[30%] text-left font-medium text-subHeading p-4">
               Employee Id
             </th>
-            <th className="text-sm leading-4 w-[25%] text-left font-medium text-subHeading p-4">
+            <th className="text-sm leading-4 w-[15%] text-left font-medium text-subHeading p-4">
               Total Reviews
+            </th>
+            <th className="text-sm leading-4 w-[15%] text-left font-medium text-subHeading p-4">
+              QR Code
             </th>
             <th className="text-sm leading-4 w-[15%] text-left font-medium text-subHeading p-4">
               Action
@@ -183,19 +248,37 @@ export default function ViewLocationClient({
                 key={employee._id}
                 className="rounded-[12px] border border-stroke/60 group"
               >
-                <td className="text-base leading-6 w-[30%] text-left font-medium text-subHeading p-4">
+                <td className="text-base leading-6 w-[25%] text-left font-medium text-subHeading p-4">
                   {employee.name}
                 </td>
                 <td className="text-base leading-6 w-[30%] text-left font-medium text-subHeading p-4">
                   {employee.employee_id}
                 </td>
-                <td className="text-base leading-6 w-[25%] text-left font-medium text-subHeading p-4">
+                <td className="text-base leading-6 w-[15%] text-left font-medium text-subHeading p-4">
                   {employee.total_reviews}
+                </td>
+                <td className="w-[15%] text-left p-4">
+                  {downloadEmployeeQrCodeLoading.employeeId === employee._id ? (
+                    <div className="text-base font-medium text-subHeading leading-6">
+                      Loading...
+                    </div>
+                  ) : (
+                    <button
+                      disabled={downloadEmployeeQrCodeLoading.loading}
+                      className="text-base font-medium text-secondary leading-6 bg-transparent border-0 underline"
+                      onClick={() => {
+                        handleDownloadEmployeeQrCode(employee);
+                      }}
+                    >
+                      Download
+                    </button>
+                  )}
                 </td>
                 <td className="text-base leading-6 w-[15%] text-left font-medium text-subHeading p-2">
                   <div className="hidden group-hover:block">
                     <div className="flex items-center gap-2">
                       <button
+                        disabled={downloadEmployeeQrCodeLoading.loading}
                         className="w-8 h-8 rounded-full flex items-center justify-center bg-primary"
                         onClick={() =>
                           router.push(
@@ -210,6 +293,7 @@ export default function ViewLocationClient({
                         />
                       </button>
                       <button
+                        disabled={downloadEmployeeQrCodeLoading.loading}
                         className="w-8 h-8 rounded-full flex items-center justify-center bg-error"
                         onClick={() =>
                           setDeleteEmployeeModel({
@@ -324,13 +408,16 @@ export default function ViewLocationClient({
                         View Customer Flow
                       </Link>
                       <Button
+                        isLoading={downloadLocationQrCodeLoading}
+                        isDisabled={downloadLocationQrCodeLoading}
                         buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-secondary text-white"
                         buttonText="View QR code"
                         onClick={() => {
-                          console.log("Download QR Code API Call");
+                          handleDownloadLocationQrCode();
                         }}
                       />
                     </div>
+                    <a className="hidden" ref={downloadQrCodeRef}></a>
                   </div>
                 </div>
                 <div className="w-[57%]">

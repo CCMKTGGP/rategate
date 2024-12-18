@@ -19,6 +19,7 @@ import Input from "../input";
 import ApiSuccess from "../api-success";
 import ApiError from "../api-error";
 import { ILocation } from "@/app/api/location/interface";
+import { IEmployee } from "@/app/api/employee/interface";
 
 export default function ReviewForm({
   businessId,
@@ -32,9 +33,15 @@ export default function ReviewForm({
   const router = useRouter();
   const [business, setBusiness] = useState<IBusiness>();
   const [location, setLocation] = useState<ILocation>();
+  const [employee, setEmployee] = useState<IEmployee>();
   const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [fetchBusinessDetailsLoading, setFetchBusinessDetailsLoading] =
+    useState(true);
+  const [fetchLocationDetailsLoading, setFetchLocationDetailsLoading] =
+    useState(false);
+  const [fetchEmployeeDetailsLoading, setFetchEmployeeDetailsLoading] =
+    useState(false);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
   const [negativeFeedback, setNegativeFeedback] = useState("");
   const [postReviewLoading, setPostReviewLoading] = useState(false);
@@ -68,7 +75,7 @@ export default function ReviewForm({
       } catch (err: any) {
         setNoBusinessError(true);
       } finally {
-        setIsLoading(false);
+        setFetchBusinessDetailsLoading(false);
       }
     }
 
@@ -79,6 +86,7 @@ export default function ReviewForm({
 
   useEffect(() => {
     async function getLocationDetails() {
+      setFetchLocationDetailsLoading(true);
       try {
         const response = await fetchData(`/api/location/${locationId}`);
         const { data } = response;
@@ -86,7 +94,7 @@ export default function ReviewForm({
       } catch (err: any) {
         setNoBusinessError(true);
       } finally {
-        setIsLoading(false);
+        setFetchLocationDetailsLoading(false);
       }
     }
 
@@ -94,6 +102,25 @@ export default function ReviewForm({
       getLocationDetails();
     }
   }, [locationId]);
+
+  useEffect(() => {
+    async function getEmployeeDetails() {
+      setFetchEmployeeDetailsLoading(true);
+      try {
+        const response = await fetchData(`/api/employee/${employeeId}`);
+        const { data } = response;
+        setEmployee(data);
+      } catch (err: any) {
+        setNoBusinessError(true);
+      } finally {
+        setFetchEmployeeDetailsLoading(false);
+      }
+    }
+
+    if (employeeId) {
+      getEmployeeDetails();
+    }
+  }, [employeeId]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -164,6 +191,17 @@ export default function ReviewForm({
     return true;
   }
 
+  function getPlatformsBasedOnId() {
+    if (locationId) {
+      return (
+        location?.platforms?.filter((platform) => platform?.url !== "") || []
+      );
+    }
+    return (
+      business?.platforms?.filter((platform) => platform?.url !== "") || []
+    );
+  }
+
   async function handleContactFormSubmit() {
     const ALL_CHECKS_PASS = [
       checkEmail(),
@@ -219,17 +257,6 @@ export default function ReviewForm({
     } finally {
       setPostReviewLoading(false);
     }
-  }
-
-  function getPlatformsBasedOnId() {
-    if (locationId) {
-      return (
-        location?.platforms?.filter((platform) => platform?.url !== "") || []
-      );
-    }
-    return (
-      business?.platforms?.filter((platform) => platform?.url !== "") || []
-    );
   }
 
   async function handlePostNegativeFeedback() {
@@ -375,6 +402,17 @@ export default function ReviewForm({
           <p className="text-base leading-6 text-subHeading">
             posting your review...
           </p>
+        )}
+        {error.apiError && (
+          <ApiError
+            message={error.apiError}
+            setMessage={(value) =>
+              setError((error) => ({
+                ...error,
+                apiError: value,
+              }))
+            }
+          />
         )}
       </div>
     </div>
@@ -545,7 +583,7 @@ export default function ReviewForm({
               }))
             }
             error={error.firstNameError}
-            disabled={isLoading}
+            disabled={contactFormLoading}
           />
           <Input
             type="text"
@@ -559,7 +597,7 @@ export default function ReviewForm({
               }))
             }
             error={error.lastNameError}
-            disabled={isLoading}
+            disabled={contactFormLoading}
           />
           <Input
             type="email"
@@ -573,7 +611,7 @@ export default function ReviewForm({
               }))
             }
             error={error.emailError}
-            disabled={isLoading}
+            disabled={contactFormLoading}
           />
           {error.apiError && (
             <ApiError
@@ -622,10 +660,14 @@ export default function ReviewForm({
     </div>
   );
 
-  if (isLoading) {
+  if (
+    fetchBusinessDetailsLoading ||
+    fetchLocationDetailsLoading ||
+    fetchEmployeeDetailsLoading
+  ) {
     return (
       <div className="w-[100vw] h-[100vh] bg-background flex items-center justify-center">
-        Fetching business details...
+        Fetching details...
       </div>
     );
   }
@@ -751,6 +793,11 @@ export default function ReviewForm({
       {location?._id && (
         <p className="text-base leading-[24px] font-medium text-subHeading">
           {"Review Location ->"} {location?.name}
+        </p>
+      )}
+      {employee?._id && (
+        <p className="text-base leading-[24px] font-medium text-subHeading">
+          {"Employee ->"} {employee?.name}
         </p>
       )}
       {currentStep === LANDING_PAGE && LANDING_PAGE_COMPONENT}

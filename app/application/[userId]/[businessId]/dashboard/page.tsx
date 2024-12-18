@@ -1,12 +1,12 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
 import Sidebar from "@/app/components/sidebar";
 import TopBar from "@/app/components/topbar";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
-import { deleteData, fetchData } from "@/utils/fetch";
+import { deleteData, fetchData, postData } from "@/utils/fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,10 @@ export default function Dashboard() {
   const router = useRouter();
   const { user } = useUserContext();
   const { business } = useBusinessContext();
+
+  const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [locations, setLocations] = useState<ILocation[]>([]);
+  const [downloadQrCodeLoading, setDownloadQrCodeLoading] = useState(false);
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [successDeleteMessage, setSuccessDeleteMessage] = useState("");
   const [fetchLocationsLoading, setFetchLocationLoading] = useState(false);
@@ -77,6 +80,28 @@ export default function Dashboard() {
       }));
     } finally {
       setDeleteLocationLoading(false);
+    }
+  }
+
+  // download QR code
+  async function handleDownloadQrCode() {
+    setDownloadQrCodeLoading(true);
+    try {
+      const response = await postData("/api/generate-qr-code", {
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`,
+      });
+      const { data } = response;
+      const ref: any = downloadQrCodeRef?.current;
+      ref.href = data.qrCodeUrl;
+      ref.download = `${business.name}_qr_code.png`;
+      ref.click();
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setDownloadQrCodeLoading(false);
     }
   }
 
@@ -183,6 +208,7 @@ export default function Dashboard() {
       </table>
     );
   }
+
   return (
     <div className="flex items-start bg-white">
       <Sidebar />
@@ -224,12 +250,15 @@ export default function Dashboard() {
                       View Customer Flow
                     </Link>
                     <Button
+                      isLoading={downloadQrCodeLoading}
+                      isDisabled={downloadQrCodeLoading}
                       buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-secondary text-white"
                       buttonText="View QR code"
                       onClick={() => {
-                        console.log("Download QR Code API Call");
+                        handleDownloadQrCode();
                       }}
                     />
+                    <a className="hidden" ref={downloadQrCodeRef}></a>
                   </div>
                 </div>
               </div>

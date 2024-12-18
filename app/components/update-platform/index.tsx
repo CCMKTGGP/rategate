@@ -27,8 +27,6 @@ export default function UpdatePlatforms({
     return urlRegex.test(url);
   }
 
-  console.log(businessPlatforms);
-
   async function handleUpdatePlatforms() {
     // check whether all the urls added are in correct format
     const validUrls = businessPlatforms.filter((platform: IPlatform) =>

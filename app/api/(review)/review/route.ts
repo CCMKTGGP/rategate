@@ -5,6 +5,7 @@ import Review from "@/lib/models/review";
 import Business from "@/lib/models/business";
 import Plan from "@/lib/models/plan";
 import Location from "@/lib/models/location";
+import Employee from "@/lib/models/employee";
 
 // get all reviews for a business.
 export const GET = async (request: Request) => {
@@ -73,6 +74,13 @@ export const POST = async (request: Request) => {
         { status: 400 }
       );
     }
+    // check if employeeId exist if yes then check if it is valid
+    if (employeeId && !Types.ObjectId.isValid(employeeId)) {
+      return new NextResponse(
+        JSON.stringify({ message: "Invalid employeeId!" }),
+        { status: 400 }
+      );
+    }
 
     // establish the database connection
     await connect();
@@ -118,7 +126,7 @@ export const POST = async (request: Request) => {
     await newReview.save();
 
     // if no location id exists then update the platform of the business
-    if (!locationId) {
+    if (!locationId && !feedback) {
       // loop through all the platforms of the business
       const updatedPlatforms = business.platforms.map((p: any) => {
         if (p.id === platform.id) {
@@ -157,20 +165,30 @@ export const POST = async (request: Request) => {
           { status: 400 }
         );
       }
-      // loop through all the platforms of the location
-      const updatedPlatforms = location.platforms.map((p: any) => {
-        if (p.id === platform.id) {
-          p.total_reviews += 1;
+      let locationUpdateData = {};
+      locationUpdateData = {
+        total_reviews: location.total_reviews + 1,
+      };
+
+      if (!feedback) {
+        // loop through all the platforms of the location
+        const updatedPlatforms = location.platforms.map((p: any) => {
+          if (p.id === platform.id) {
+            p.total_reviews += 1;
+            return p;
+          }
           return p;
-        }
-        return p;
-      });
-      // update the users table with the new business id
+        });
+        locationUpdateData = {
+          ...locationUpdateData,
+          platforms: updatedPlatforms,
+        };
+      }
+      // update the location table with the total reviews for the provider of the location
       const updatedLocation = await Location.findOneAndUpdate(
         { _id: locationId },
         {
-          platforms: updatedPlatforms,
-          total_reviews: location.total_reviews + 1,
+          ...locationUpdateData,
         },
         {
           new: true,
@@ -181,6 +199,35 @@ export const POST = async (request: Request) => {
       if (!updatedLocation) {
         return new NextResponse(
           JSON.stringify({ message: "Location not updated!" }),
+          { status: 400 }
+        );
+      }
+    }
+
+    if (employeeId) {
+      // find if the employee exists in our database
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        return new NextResponse(
+          JSON.stringify({ message: "Employee does not exist!" }),
+          { status: 400 }
+        );
+      }
+      // update the employee table with the total reviews of the employee
+      const updatedEmployee = await Employee.findOneAndUpdate(
+        { _id: employeeId },
+        {
+          total_reviews: employee.total_reviews + 1,
+        },
+        {
+          new: true,
+        }
+      );
+
+      // check if the process successed
+      if (!updatedEmployee) {
+        return new NextResponse(
+          JSON.stringify({ message: "Employee not updated!" }),
           { status: 400 }
         );
       }

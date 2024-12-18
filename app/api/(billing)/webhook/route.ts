@@ -64,7 +64,6 @@ export const POST = async (req: NextRequest) => {
         SUBSCRIPTION_TYPES.ADD_EMPLOYEE.toLowerCase()
       ) {
         try {
-          console.log(sessionData?.data);
           // find the location based on the locationId in the metadata
           const locationId = sessionData?.data?.location_id;
           await connect();
