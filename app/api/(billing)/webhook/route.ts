@@ -1,5 +1,6 @@
 import { SUBSCRIPTION_TYPES } from "@/constants/subscription_types";
 import connect from "@/lib/db";
+import Business from "@/lib/models/business";
 import Employee from "@/lib/models/employee";
 import Location from "@/lib/models/location";
 import { Types } from "mongoose";
@@ -100,40 +101,66 @@ export const POST = async (req: NextRequest) => {
           console.log(err);
         }
       }
+
+      // if the type is for business subscription
+      if (
+        sessionData?.type?.toLowerCase() ===
+        SUBSCRIPTION_TYPES.SUBSCRIBE_PLAN.toLowerCase()
+      ) {
+        try {
+          const { plan_id, business_id } = sessionData?.data;
+          await connect();
+          const business = await Business.findById(business_id);
+
+          if (!business) {
+            return new NextResponse(
+              JSON.stringify({ message: "Business does not exist!" }),
+              { status: 400 }
+            );
+          }
+
+          const updateData = {
+            plan_id: new Types.ObjectId(plan_id),
+            subscription_id: subscriptionId,
+          };
+          await Business.findOneAndUpdate({ _id: business_id }, updateData);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
       break;
-    // case "customer.subscription.created":
-    // case "customer.subscription.updated":
-    // case "customer.subscription.deleted":
-    //   const subscription = event.data.object as Stripe.Subscription;
-    //   const userIdFromMetadata = subscription.metadata?.userId;
-    //   const plan_id = subscription.metadata?.planId;
-    //   const plan_type = subscription.metadata?.planType;
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted":
+      const subscription = event.data.object as Stripe.Subscription;
+      const updateSubscriptionMetadata = subscription.metadata?.data;
+      const updateSubscriptionSessionData = JSON.parse(
+        updateSubscriptionMetadata || ""
+      );
+      const { plan_id, business_id } = updateSubscriptionSessionData?.data;
 
-    //   if (userIdFromMetadata) {
-    //     await connect();
+      if (business_id) {
+        await connect();
 
-    //     const updateFields =
-    //       event.type === "customer.subscription.deleted"
-    //         ? { subscriptionId: null, planType: null }
-    //         : {
-    //             subscriptionId: subscription.id,
-    //             planType: plan_type,
-    //             plan: new Types.ObjectId(plan_id),
-    //           };
+        const updateFields =
+          event.type === "customer.subscription.deleted"
+            ? { subscription_id: null }
+            : {
+                subscription_id: subscription.id,
+                plan_id: new Types.ObjectId(plan_id),
+              };
 
-    //     try {
-    //       await User.findOneAndUpdate(
-    //         { _id: userIdFromMetadata },
-    //         updateFields
-    //       );
-    //     } catch (err: any) {
-    //       console.log(
-    //         `Failed to update user for event ${event.type}:`,
-    //         err.message
-    //       );
-    //     }
-    //   }
-    //   break;
+        try {
+          await Business.findOneAndUpdate({ _id: business_id }, updateFields);
+        } catch (err: any) {
+          console.log(
+            `Failed to update user for event ${event.type}:`,
+            err.message
+          );
+        }
+      }
+      break;
     default:
       console.log(`Unhandled event type ${event.type}`);
       return new NextResponse("Received", { status: 200 });

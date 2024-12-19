@@ -29,7 +29,7 @@ export const GET = async (request: Request, context: { params: Params }) => {
     // get business details from businessId
     const business = await Business.findById(businessId).populate({
       path: "plan_id",
-      select: ["_id", "plan_id", "max_reviews"],
+      select: ["_id", "plan_id", "max_reviews", "max_locations"],
     });
 
     if (!business) {
@@ -48,7 +48,10 @@ export const GET = async (request: Request, context: { params: Params }) => {
       business_id: new Types.ObjectId(businessId),
     });
 
-    if (reviews.length >= business.plan_id.max_reviews) {
+    if (
+      business.plan_id.max_reviews &&
+      reviews.length >= business.plan_id.max_reviews
+    ) {
       is_allowed_to_review = false;
     }
 

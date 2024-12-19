@@ -25,6 +25,9 @@ const PlanSchema = new Schema(
       type: Number,
       required: true,
     },
+    features: {
+      type: Array<string>,
+    },
   },
   {
     timestamps: true,

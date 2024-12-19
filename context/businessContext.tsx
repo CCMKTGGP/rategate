@@ -10,12 +10,11 @@ export interface IBusiness {
   email: string;
   phone_number: string;
   platforms: Array<IPlatform>;
-  plan: {
+  plan_id: {
     _id: string;
     plan_id: string;
-    name: string;
-    max_reviews: string;
-    max_locations: string;
+    max_reviews: number;
+    max_locations: number;
   };
   is_verified: boolean;
   verify_token?: string;
@@ -29,12 +28,11 @@ export const INITIAL_BUSINESS_STATE: IBusiness = {
   email: "",
   phone_number: "",
   platforms: [],
-  plan: {
+  plan_id: {
     _id: "",
     plan_id: "",
-    name: "",
-    max_reviews: "",
-    max_locations: "",
+    max_reviews: 0,
+    max_locations: 0,
   },
   is_verified: false,
 };
