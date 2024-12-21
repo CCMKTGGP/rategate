@@ -1,5 +1,6 @@
 import { SUBSCRIPTION_TYPES } from "@/constants/subscription_types";
 import Business from "@/lib/models/business";
+import Location from "@/lib/models/location";
 import Plan from "@/lib/models/plan";
 import User from "@/lib/models/user";
 import PAYMENT_CONSTANTS from "@/utils/payments";
@@ -88,6 +89,22 @@ export async function POST(req: NextRequest) {
     return new NextResponse(
       JSON.stringify({
         message: "Price ID not defined for the selected plan!",
+      }),
+      { status: 400 }
+    );
+  }
+
+  // fetch all the locations for the business
+  const locations = await Location.find({
+    business_id: new Types.ObjectId(businessId),
+  });
+
+  // if the length of locations are greater than the number of locations allowed
+  // throw an error
+  if (plan.max_locations && locations.length > plan.max_locations) {
+    return new NextResponse(
+      JSON.stringify({
+        message: `You have too many locations. ${plan.name} plan only allow ${plan.max_locations} location. Please delete some location and try again!`,
       }),
       { status: 400 }
     );

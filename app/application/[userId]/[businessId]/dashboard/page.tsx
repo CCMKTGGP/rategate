@@ -300,7 +300,7 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                            {platform.total_reviews} Revies
+                            {platform.total_reviews} Reviews
                           </p>
                         </div>
                       );
@@ -316,6 +316,10 @@ export default function Dashboard() {
                 Locations
               </h3>
               <Button
+                isDisabled={
+                  business?.plan_id?.max_locations !== null &&
+                  locations.length >= business.plan_id.max_locations
+                }
                 buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
                 buttonText="Add Location"
                 onClick={() => {

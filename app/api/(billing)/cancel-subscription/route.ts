@@ -1,4 +1,6 @@
 import Business from "@/lib/models/business";
+import Employee from "@/lib/models/employee";
+import Location from "@/lib/models/location";
 import Plan from "@/lib/models/plan";
 import User from "@/lib/models/user";
 import { PlanTypes } from "@/utils/planTypes";
@@ -57,6 +59,39 @@ export async function POST(req: NextRequest) {
   if (!business) {
     return new NextResponse(
       JSON.stringify({ message: "Business does not exist!" }),
+      { status: 400 }
+    );
+  }
+
+  // fetch all the locations for the business
+  const locations = await Location.find({
+    business_id: new Types.ObjectId(businessId),
+  });
+
+  // if the length of locations are greater than the number of locations allowed
+  // throw an error
+  if (locations.length > 1) {
+    return new NextResponse(
+      JSON.stringify({
+        message:
+          "You have too many locations. Basic plan only allow 1 location. Please delete some location and try again!",
+      }),
+      { status: 400 }
+    );
+  }
+
+  // fetch all the employees for the business
+  const employees = await Employee.find({
+    business_id: new Types.ObjectId(businessId),
+  });
+
+  // check if the list of employees =0
+  if (employees.length > 0) {
+    return new NextResponse(
+      JSON.stringify({
+        message:
+          "You have too many employees. Basic plan does not allow that. Please delete all employees and try again!",
+      }),
       { status: 400 }
     );
   }

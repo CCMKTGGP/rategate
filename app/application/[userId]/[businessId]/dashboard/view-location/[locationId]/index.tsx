@@ -11,6 +11,7 @@ import { PLATFORM_TYPES } from "@/app/components/update-platform/interface";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { deleteData, fetchData, postData } from "@/utils/fetch";
+import { PlanTypes } from "@/utils/planTypes";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -458,7 +459,7 @@ export default function ViewLocationClient({
                               </p>
                             </div>
                             <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                              {platform.total_reviews} Revies
+                              {platform.total_reviews} Reviews
                             </p>
                           </div>
                         );
@@ -475,6 +476,10 @@ export default function ViewLocationClient({
                 Team Members
               </h3>
               <Button
+                isDisabled={
+                  business.plan_id.plan_id.toLowerCase() ===
+                  PlanTypes.BASIC.toLowerCase()
+                }
                 buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
                 buttonText="Add Team Member"
                 onClick={() => {

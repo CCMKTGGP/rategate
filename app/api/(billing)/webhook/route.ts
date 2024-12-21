@@ -28,7 +28,7 @@ export const POST = async (req: NextRequest) => {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session;
       const metadata = session.metadata?.data;
-      const sessionData = JSON.parse(metadata || "");
+      const sessionData = JSON.parse(metadata || "{}");
 
       const subscriptionId = session.subscription as string;
 
@@ -128,7 +128,6 @@ export const POST = async (req: NextRequest) => {
           console.log(err);
         }
       }
-
       break;
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -136,28 +135,30 @@ export const POST = async (req: NextRequest) => {
       const subscription = event.data.object as Stripe.Subscription;
       const updateSubscriptionMetadata = subscription.metadata?.data;
       const updateSubscriptionSessionData = JSON.parse(
-        updateSubscriptionMetadata || ""
+        updateSubscriptionMetadata || "{}"
       );
-      const { plan_id, business_id } = updateSubscriptionSessionData?.data;
+      if (Object.keys(updateSubscriptionSessionData).length > 0) {
+        const { plan_id, business_id } = updateSubscriptionSessionData?.data;
 
-      if (business_id) {
-        await connect();
+        if (business_id) {
+          await connect();
 
-        const updateFields =
-          event.type === "customer.subscription.deleted"
-            ? { subscription_id: null }
-            : {
-                subscription_id: subscription.id,
-                plan_id: new Types.ObjectId(plan_id),
-              };
+          const updateFields =
+            event.type === "customer.subscription.deleted"
+              ? { subscription_id: null }
+              : {
+                  subscription_id: subscription.id,
+                  plan_id: new Types.ObjectId(plan_id),
+                };
 
-        try {
-          await Business.findOneAndUpdate({ _id: business_id }, updateFields);
-        } catch (err: any) {
-          console.log(
-            `Failed to update user for event ${event.type}:`,
-            err.message
-          );
+          try {
+            await Business.findOneAndUpdate({ _id: business_id }, updateFields);
+          } catch (err: any) {
+            console.log(
+              `Failed to update user for event ${event.type}:`,
+              err.message
+            );
+          }
         }
       }
       break;

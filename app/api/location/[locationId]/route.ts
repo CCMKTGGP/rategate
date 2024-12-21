@@ -157,6 +157,17 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
           );
         }
       }
+      const deleteEmployee = await Employee.findByIdAndDelete({
+        _id: employee._id,
+      });
+
+      // check if the process successed
+      if (!deleteEmployee) {
+        return new NextResponse(
+          JSON.stringify({ message: "Employee not deleted!" }),
+          { status: 400 }
+        );
+      }
     }
 
     // Cancel the Stripe subscription for the location
