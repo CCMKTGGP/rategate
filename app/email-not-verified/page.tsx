@@ -68,7 +68,7 @@ export default function EmailNotVerified() {
             </p>
             <div className="flex flex-col gap-2">
               <p className="text-sm text-center leading-6 text-subHeading mx-auto max-w-[90%]">
-                Still not found? Hit "Resend".
+                {`Still not found? Hit "Resend".`}
               </p>
               <Button
                 isDisabled={loading}

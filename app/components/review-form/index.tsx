@@ -567,7 +567,9 @@ export default function ReviewForm({
             Please leave your contact information.
           </h2>
           <p className="text-base leading-6 text-subHeading">
-            We'll use your information only to contact you about this feedback.
+            {
+              "We'll use your information only to contact you about this feedback."
+            }
           </p>
         </div>
         <div className="flex flex-col md:w-[350px]">

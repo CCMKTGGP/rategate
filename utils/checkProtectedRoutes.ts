@@ -13,7 +13,3 @@ export function isRouteProtected(url: string) {
   }
   return false;
 }
-
-export function isPaidUser(user: IUser) {
-  return user?.plan?.plan_id?.toLowerCase() !== PlanTypes.BASIC.toLowerCase();
-}

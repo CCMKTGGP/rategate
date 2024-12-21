@@ -167,7 +167,7 @@ export default function CollectSurvey() {
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
-          You're all set!
+          {"You're all set!"}
         </h1>
         <p className="text-base leading-6 text-subHeading w-[80%]">
           {

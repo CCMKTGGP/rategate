@@ -13,7 +13,7 @@ import { postData } from "@/utils/fetch";
 import Image from "next/image";
 import React, { useState } from "react";
 
-export default function page() {
+export default function BusinessEmailNotVerified() {
   const { business } = useBusinessContext();
   const { user } = useUserContext();
   const [currentStep, _] = useState(BUSINESS_EMAIL_NOT_VERIFIED);
@@ -90,7 +90,7 @@ export default function page() {
               </p>
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-center leading-6 text-subHeading mx-auto max-w-[90%]">
-                  Still not found? Hit "Resend".
+                  {`Still not found? Hit "Resend".`}
                 </p>
                 <Button
                   isDisabled={loading}
