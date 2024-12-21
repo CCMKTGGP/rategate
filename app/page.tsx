@@ -23,8 +23,8 @@ export default function Home() {
             Welcome to Rategate.
           </h1>
           <p className="text-base leading-6 text-heading w-[80%] text-center">
-            your one and only platform to collect reviews and monitor your
-            employee's performance.
+            {`your one and only platform to collect reviews and monitor your
+            employee's performance.`}
           </p>
         </div>
         <Button
