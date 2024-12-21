@@ -31,6 +31,7 @@ export default function ReviewForm({
   employeeId?: string;
 }) {
   const router = useRouter();
+  const [review, setReview] = useState<any>();
   const [business, setBusiness] = useState<IBusiness>();
   const [location, setLocation] = useState<ILocation>();
   const [employee, setEmployee] = useState<IEmployee>();
@@ -217,6 +218,7 @@ export default function ReviewForm({
         lastName,
         email,
         businessId,
+        reviewId: review._id,
       });
       setContactSuccessMessage("Thank you for your contact!");
       router.push("/");
@@ -269,7 +271,8 @@ export default function ReviewForm({
         locationId,
         employeeId,
       });
-      const { message } = response;
+      const { message, data } = response;
+      setReview(data);
       setReviewSuccessMessage(message);
       setCurrentStep(NEGATIVE_FEEDBACK_THANK_YOU);
     } catch (err: any) {

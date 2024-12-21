@@ -175,9 +175,6 @@ export default function AddLocation() {
   const SELECT_PLATFORMS_COMPONENT = (
     <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30 flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        {/* <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
-          {"Choose the platforms where you'd like to collect reviews."}
-        </h1> */}
         <p className="text-base leading-6 text-heading w-[80%]">
           {"Choose the platforms where you'd like to collect reviews."}
         </p>
