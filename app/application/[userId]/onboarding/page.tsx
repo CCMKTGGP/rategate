@@ -98,7 +98,7 @@ export default function Onboarding() {
         </h1>
       </div>
       <div className="flex flex-col gap-4">
-        <form className="w-[500px]">
+        <form className="w-full lg:w-[500px]">
           <Input
             type="text"
             label="Business Name"
@@ -180,7 +180,7 @@ export default function Onboarding() {
         </p>
       </div>
       <div className="flex flex-col gap-4">
-        <form className="w-[500px]">
+        <form className="w-full lg:w-[500px]">
           {PLATFORMS.map(({ id, name, helperText, label }) => {
             const selectedPlatform = platforms.filter(
               (platform) => platform.id.toLowerCase() === id.toLowerCase()
@@ -332,8 +332,8 @@ export default function Onboarding() {
 
   return (
     <main className="flex items-center bg-background">
-      <div className="bg-white h-[100vh] w-[50%] overflow-auto">
-        <div className="px-12">
+      <div className="bg-white h-[100vh] w-full lg:w-[50%] overflow-auto">
+        <div className="px-6 lg:px-12">
           <div className="py-12">
             <Image
               src="/logo.png"
@@ -355,27 +355,29 @@ export default function Onboarding() {
           </div>
         </div>
       </div>
-      <div className="w-[50%] h-full flex flex-col items-center gap-8">
-        {currentStep === COLLECT_BUSINESS_INFO && (
-          <Image
-            src="/onboarding-step-1.png"
-            alt="Onboarding Step 1"
-            className="h-[250px]"
-            width={450}
-            height={250}
-            priority
-          />
-        )}
-        {currentStep === SELECT_PLATFORMS && (
-          <Image
-            src="/onboarding-step-2.png"
-            alt="Onboarding Step 2"
-            className="h-[250px]"
-            width={400}
-            height={200}
-            priority
-          />
-        )}
+      <div className="hidden lg:block w-[50%] h-full">
+        <div className="h-full flex flex-col items-center gap-8">
+          {currentStep === COLLECT_BUSINESS_INFO && (
+            <Image
+              src="/onboarding-step-1.png"
+              alt="Onboarding Step 1"
+              className="h-[250px]"
+              width={450}
+              height={250}
+              priority
+            />
+          )}
+          {currentStep === SELECT_PLATFORMS && (
+            <Image
+              src="/onboarding-step-2.png"
+              alt="Onboarding Step 2"
+              className="h-[250px]"
+              width={400}
+              height={200}
+              priority
+            />
+          )}
+        </div>
       </div>
     </main>
   );

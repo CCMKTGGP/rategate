@@ -82,7 +82,7 @@ export default function CollectSurvey() {
           Just some survey information that would help us to serve better
         </h1>
         <div className="flex flex-col gap-4">
-          <form className="w-[500px]">
+          <form className="w-full lg:w-[500px]">
             <Dropdown
               id="selectedHearFrom"
               label="How did you hear about Rategate?"
@@ -169,7 +169,7 @@ export default function CollectSurvey() {
         <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
           {"You're all set!"}
         </h1>
-        <p className="text-base leading-6 text-subHeading w-[80%]">
+        <p className="text-base leading-6 text-subHeading w-full lg:w-[80%]">
           {
             "We’ve got your Shareable Link and QR Code ready for you. You can edit/add your review platforms, locations, and team members from your dashboard."
           }
@@ -188,8 +188,8 @@ export default function CollectSurvey() {
   );
   return (
     <main className="flex items-center bg-background">
-      <div className="bg-white h-[100vh] w-[50%] overflow-auto">
-        <div className="px-12">
+      <div className="bg-white h-[100vh] w-full lg:w-[50%] overflow-auto">
+        <div className="px-6 lg:px-12">
           <div className="py-12">
             <Image
               src="/logo.png"
@@ -211,27 +211,29 @@ export default function CollectSurvey() {
           </div>
         </div>
       </div>
-      <div className="w-[50%] h-full flex flex-col items-center gap-8">
-        {currentStep === COLLECT_SURVEY && (
-          <Image
-            src="/onboarding-step-3.png"
-            alt="Onboarding Step 3"
-            className="h-[350px]"
-            width={350}
-            height={350}
-            priority
-          />
-        )}
-        {currentStep === ALL_SET && (
-          <Image
-            src="/onboarding-step-4.png"
-            alt="Onboarding Step 4"
-            className="h-[350px]"
-            width={350}
-            height={350}
-            priority
-          />
-        )}
+      <div className="hidden lg:block w-[50%] h-full">
+        <div className="h-full flex flex-col items-center gap-8">
+          {currentStep === COLLECT_SURVEY && (
+            <Image
+              src="/onboarding-step-3.png"
+              alt="Onboarding Step 3"
+              className="h-[350px]"
+              width={350}
+              height={350}
+              priority
+            />
+          )}
+          {currentStep === ALL_SET && (
+            <Image
+              src="/onboarding-step-4.png"
+              alt="Onboarding Step 4"
+              className="h-[350px]"
+              width={350}
+              height={350}
+              priority
+            />
+          )}
+        </div>
       </div>
     </main>
   );

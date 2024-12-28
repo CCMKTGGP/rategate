@@ -131,7 +131,7 @@ export default function Login() {
   }
   return (
     <main className="flex items-center bg-background">
-      <div className="bg-white h-[100vh] w-[50%]">
+      <div className="bg-white h-[100vh] w-full lg:w-[50%]">
         <div className="py-8 px-6">
           <Image
             src="/logo.png"
@@ -143,12 +143,12 @@ export default function Login() {
           />
         </div>
         <div className="py-8 w-full flex flex-col items-center">
-          <div className="flex flex-col w-[400px] gap-12">
+          <div className="flex flex-col w-[300px] lg:w-[400px] gap-12">
             <div className="flex flex-col items-center gap-4">
-              <h1 className="text-4xl leading-8 text-heading font-archivo font-bold">
+              <h1 className="text-3xl lg:text-4xl leading-8 text-heading font-archivo font-bold">
                 Login
               </h1>
-              <p className="text-base leading-6 text-subHeading w-[80%] text-center mx-auto">
+              <p className="text-base leading-6 text-subHeading w-full lg:w-[80%] text-center mx-auto">
                 By logging into your account, you agree to our
                 <span>
                   <Link
@@ -226,23 +226,25 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="w-[50%] h-full flex flex-col items-center gap-8">
-        <div className="flex flex-col gap-2 items-center">
-          <h2 className="text-2xl text-subHeading leading-7">
-            Welcome to Rategate
-          </h2>
-          <p className="text-base leading-6 text-subHeading">
-            {"First things first, let’s set you up with an account.👋🏼"}
-          </p>
+      <div className="hidden lg:block w-[50%] h-full ">
+        <div className="h-full flex flex-col items-center gap-8">
+          <div className="flex flex-col gap-2 items-center">
+            <h2 className="text-2xl text-subHeading leading-7">
+              Welcome to Rategate
+            </h2>
+            <p className="text-base leading-6 text-subHeading">
+              {"First things first, let’s set you up with an account.👋🏼"}
+            </p>
+          </div>
+          <Image
+            src="/auth-illustration.png"
+            alt="Auth Illustration"
+            className="h-[350px]"
+            width={400}
+            height={100}
+            priority
+          />
         </div>
-        <Image
-          src="/auth-illustration.png"
-          alt="Auth Illustration"
-          className="h-[350px]"
-          width={400}
-          height={100}
-          priority
-        />
       </div>
     </main>
   );
