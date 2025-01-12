@@ -31,6 +31,7 @@ export default function ViewLocationClient({
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [fetchEmployeesLoading, setFetchEmployeesLoading] = useState(false);
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
+  const [copySuccess, setCopySuccess] = useState("");
   const [toggleUpdatePlatformModel, setToggleUpdatePlatformModel] =
     useState(false);
   const [downloadLocationQrCodeLoading, setDownloadLocationQrCodeLoading] =
@@ -47,6 +48,7 @@ export default function ViewLocationClient({
   const [deleteEmployeeLoading, setDeleteEmployeeLoading] = useState(false);
   const [_, setSuccessDeleteMessage] = useState("");
   const [error, setError] = useState({
+    shareError: "",
     nameError: "",
     addressError: "",
     fetchLocationDetailsError: "",
@@ -204,6 +206,47 @@ export default function ViewLocationClient({
     }
   }
 
+  // share url
+  async function handleShare() {
+    if (!navigator.share) {
+      setError((error) => ({
+        ...error,
+        shareError: "Web Share API is not supported in your browser.",
+      }));
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: `Check out this review for location ${name}!`,
+        text: "I found this review interesting. Take a look!",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+      });
+    } catch (err) {
+      console.log("Error sharing:", err);
+    }
+  }
+
+  // copy url
+  function handleCopy() {
+    try {
+      navigator.clipboard
+        .writeText(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`
+        )
+        .then(() => {
+          setCopySuccess("Copied to clipboard!");
+          setTimeout(() => setCopySuccess(""), 3000); // Clear the message after 3 seconds
+        });
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+      setError((error) => ({
+        ...error,
+        copyError: "Failed to copy the content.",
+      }));
+    }
+  }
+
   function renderLoadingOrTable() {
     if (fetchEmployeesLoading) {
       return (
@@ -222,7 +265,7 @@ export default function ViewLocationClient({
     }
 
     return (
-      <table className="mt-8 table">
+      <table className="mt-4 table">
         <thead>
           <tr className="rounded-[12px] border border-stroke/60">
             <th className="text-sm leading-4 w-[25%] text-left font-medium text-subHeading p-4">
@@ -351,7 +394,7 @@ export default function ViewLocationClient({
             </p>
           ) : _id ? (
             <div className="flex flex-col pb-12">
-              <div className="flex items-center">
+              <div className="flex flex-col gap-4">
                 <div>
                   <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
                     {name}
@@ -360,7 +403,7 @@ export default function ViewLocationClient({
                     {address}
                   </p>
                 </div>
-                <div className="my-4 flex items-center gap-4 ml-auto">
+                <div className="my-4 flex items-center gap-4">
                   <Button
                     buttonClassName="px-4 py-2 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
                     buttonText="Edit"
@@ -371,7 +414,7 @@ export default function ViewLocationClient({
                     }}
                   />
                   <Button
-                    buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#FDE4E4] text-[#913838] px-4 py-2"
+                    buttonClassName="rounded-md hover:shadow-buttonHover bg-[#FDE4E4] text-[#913838] px-4 py-2"
                     buttonText="Delete"
                     onClick={() =>
                       setDeleteLocationModel({
@@ -382,95 +425,141 @@ export default function ViewLocationClient({
                   />
                 </div>
               </div>
-              <div className="flex items-start gap-8 mt-6">
-                <div className="w-[43%]">
-                  <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
-                    <h4 className="text-lg leading-10 text-heading font-medium">
-                      Status
-                    </h4>
-                    <p className="text-sm leading-4 text-subHeading">
-                      Copy this link and start collecting reviews!
-                    </p>
-                    <div className="py-4">
-                      <Link
-                        href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`}
-                        target="_blank"
-                        className="text-lg font-bold text-heading break-words underline"
-                      >
-                        {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review/${name}`}
-                      </Link>
-                    </div>
-                    <div className="my-4 flex items-center gap-4">
-                      <Link
-                        href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`}
-                        target="_blank"
-                        className="px-8 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
-                      >
-                        View Customer Flow
-                      </Link>
-                      <Button
-                        isLoading={downloadLocationQrCodeLoading}
-                        isDisabled={downloadLocationQrCodeLoading}
-                        buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-secondary text-white"
-                        buttonText="View QR code"
-                        onClick={() => {
-                          handleDownloadLocationQrCode();
-                        }}
+              <div className="bg-white py-4 mt-8">
+                <h4 className="text-lg leading-10 text-heading font-medium">
+                  Status
+                </h4>
+                <p className="text-sm leading-4 text-subHeading">
+                  Copy this link and start collecting reviews!
+                </p>
+                <div className="py-4 flex items-center gap-4">
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`}
+                    target="_blank"
+                    className="text-lg font-bold text-heading break-words underline"
+                  >
+                    {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review/${name}`}
+                  </Link>
+                  <div className="relative mt-2">
+                    <button
+                      type="button"
+                      className="bg-transparent border-0"
+                      onClick={() => handleCopy()}
+                    >
+                      <Image
+                        src={`/copy.svg`}
+                        alt="copy url icon"
+                        width={20}
+                        height={20}
+                        priority
                       />
-                    </div>
-                    <a className="hidden" ref={downloadQrCodeRef}></a>
+                    </button>
+                    {copySuccess && (
+                      <p className="text-sm leading-4 text-white font-medium bg-heading px-4 py-3 rounded-[8px] absolute left-[-80px] w-[200px] text-center">
+                        {copySuccess}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="w-[57%]">
-                  <div className="bg-white shadow-card border border-stroke/60 px-6 py-4">
-                    <div className="flex items-center">
-                      <h4 className="text-lg leading-10 text-heading font-medium">
-                        {`Review Platforms (${platforms?.length})`}
-                      </h4>
-                      <div className="ml-auto">
-                        <button
-                          type="button"
-                          className="bg-transparent border-0 font-bold text-base text-primary"
-                          onClick={() => {
-                            setToggleUpdatePlatformModel(true);
-                          }}
-                        >
-                          Edit Platforms
-                        </button>
+                <div className="my-4 flex items-center gap-4">
+                  <Button
+                    isLoading={downloadLocationQrCodeLoading}
+                    isDisabled={downloadLocationQrCodeLoading}
+                    buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover bg-primary text-white"
+                    buttonText="Download QR code"
+                    icon={
+                      <Image
+                        src={`/download.svg`}
+                        alt="download QR code icon"
+                        width={20}
+                        height={20}
+                        priority
+                      />
+                    }
+                    onClick={() => {
+                      handleDownloadLocationQrCode();
+                    }}
+                  />
+                  <Button
+                    isDisabled={downloadLocationQrCodeLoading}
+                    buttonClassName="px-6 py-3 rounded-md shadow-button hover:shadow-buttonHover text-white bg-secondary"
+                    buttonText="Share"
+                    icon={
+                      <Image
+                        src={`/Share.svg`}
+                        alt="share url icon"
+                        width={20}
+                        height={20}
+                        priority
+                      />
+                    }
+                    onClick={() => {
+                      handleShare();
+                    }}
+                  />
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/fake-review/${_id}`}
+                    target="_blank"
+                    className="px-8 py-3 rounded-md hover:shadow-buttonHover bg-white text-primary font-semibold"
+                  >
+                    View Customer Flow
+                  </Link>
+                </div>
+                <a className="hidden" ref={downloadQrCodeRef}></a>
+              </div>
+              <div className="bg-white py-4 mt-8">
+                <div className="flex items-center gap-8">
+                  <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
+                    {`Review Platforms (${platforms?.length})`}
+                  </h3>
+                  <button
+                    type="button"
+                    className="bg-transparent border-0 font-bold text-base text-primary"
+                    onClick={() => {
+                      setToggleUpdatePlatformModel(true);
+                    }}
+                  >
+                    Edit Platforms
+                  </button>
+                </div>
+                <div className="mt-4 flex items-center gap-4 overflow-auto">
+                  {platforms?.map((platform, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="min-w-[120px] max-w-[120px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <Image
+                            src={`/${platform.id}.svg`}
+                            alt={`Logo of ${platform.name}`}
+                            width={40}
+                            height={40}
+                            priority
+                          />
+                          <p className="text-sm leading-md text-heading text-center px-2">
+                            {platform.name}
+                          </p>
+                        </div>
+                        <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                          {platform.total_reviews} Reviews
+                        </p>
                       </div>
-                    </div>
-                    <div className="mt-[34px] flex items-center gap-4 overflow-auto">
-                      {platforms?.map((platform, index) => {
-                        return (
-                          <div
-                            key={index}
-                            className="min-w-[120px] max-w-[120px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
-                          >
-                            <div className="flex flex-col items-center gap-2">
-                              <Image
-                                src={`/${platform.id}.svg`}
-                                alt={`Logo of ${platform.name}`}
-                                width={40}
-                                height={40}
-                                priority
-                              />
-                              <p className="text-sm leading-md text-heading text-center px-2">
-                                {platform.name}
-                              </p>
-                            </div>
-                            <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                              {platform.total_reviews} Reviews
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
+              {/* <div className="flex items-start gap-8 mt-6">
+                <div className="w-[43%]">
+                  
+                </div>
+                <div className="w-[57%]">
+                  
+                </div>
+              </div> */}
             </div>
           ) : null}
-          <div className="flex flex-col pb-12">
+          <div className="flex flex-col pb-12 mt-4">
             <div className="flex items-center gap-4 mb-4">
               <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
                 Team Members
@@ -489,10 +578,6 @@ export default function ViewLocationClient({
                 }}
               />
             </div>
-            <p className="text-base leading-[24px] font-medium text-subHeading">
-              This would be a one line description of what to expect on this
-              page
-            </p>
             {error.fetchMembersError && (
               <ApiError
                 message={error.fetchMembersError}

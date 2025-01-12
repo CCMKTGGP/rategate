@@ -10,7 +10,10 @@ import {
   ONBOARDING_STEPS,
   SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
-import { PLATFORMS } from "@/constants/onboarding_platforms";
+import {
+  getPlatformPlaceholder,
+  PLATFORMS,
+} from "@/constants/onboarding_platforms";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { postData } from "@/utils/fetch";
@@ -181,7 +184,9 @@ export default function Onboarding() {
       </div>
       <div className="flex flex-col gap-4">
         <form className="w-full lg:w-[500px]">
-          {PLATFORMS.map(({ id, name, helperText, label }) => {
+          {PLATFORMS.map(({ id, platformName, helperText, label }) => {
+            //  add placeholder here
+            const placeholder = getPlatformPlaceholder(id, name);
             const selectedPlatform = platforms.filter(
               (platform) => platform.id.toLowerCase() === id.toLowerCase()
             );
@@ -189,8 +194,14 @@ export default function Onboarding() {
             return (
               <div key={id}>
                 <PlatformCheckbox
+                  placeholder={placeholder}
                   url={selectedPlatform[0]?.url}
-                  platform={{ id, name, helpertext: helperText, label }}
+                  platform={{
+                    id,
+                    name: platformName,
+                    helpertext: helperText,
+                    label,
+                  }}
                   checked={checked}
                   onSelect={({ id, name }) => {
                     let updatedPlatforms = platforms;

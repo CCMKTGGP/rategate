@@ -8,10 +8,11 @@ export default function PlatformCheckbox({
   checked,
   isLoading,
   url,
+  placeholder,
   onSelect,
   onChange,
 }: IPlatformCheckboxProps) {
-  const { label, id, name, helpertext } = platform;
+  const { id, name, helpertext } = platform;
 
   return (
     <div
@@ -37,9 +38,8 @@ export default function PlatformCheckbox({
         <div className="pl-14 w-[95%]">
           <Input
             type="text"
-            label={label}
             value={url}
-            placeholder="Enter url here"
+            placeholder={placeholder}
             helpertext={helpertext}
             onChange={(event) =>
               onChange({

@@ -166,10 +166,9 @@ export default function Login() {
                     target="_blank"
                     className="font-bold text-primary hover:text-primaryHover underline px-1"
                   >
-                    Privacy
+                    Privacy Policy
                   </Link>
                 </span>
-                Policy.
               </p>
             </div>
             <div className="flex flex-col gap-4">

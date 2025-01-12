@@ -6,6 +6,7 @@ export interface IPlatformCheckboxProps {
     name: string;
     helpertext: string;
   };
+  placeholder: string;
   checked: boolean;
   isLoading?: boolean;
   onSelect: ({ id, name }: { id: string; name: string }) => void;

@@ -21,7 +21,7 @@ import ApiError from "../api-error";
 import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
 
-export default function ReviewForm({
+export default function FakeReviewForm({
   businessId,
   locationId,
   employeeId,
@@ -31,7 +31,6 @@ export default function ReviewForm({
   employeeId?: string;
 }) {
   const router = useRouter();
-  const [review, setReview] = useState<any>();
   const [business, setBusiness] = useState<IBusiness>();
   const [location, setLocation] = useState<ILocation>();
   const [employee, setEmployee] = useState<IEmployee>();
@@ -45,9 +44,6 @@ export default function ReviewForm({
     useState(false);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
   const [negativeFeedback, setNegativeFeedback] = useState("");
-  const [postReviewLoading, setPostReviewLoading] = useState(false);
-  const [contactFormLoading, setContactFormLoading] = useState(false);
-  const [_, setReviewSuccessMessage] = useState("");
   const [contactSuccessMessage, setContactSuccessMessage] = useState("");
   const [contactFormDetails, setContactFormDetails] = useState({
     firstName: "",
@@ -203,88 +199,6 @@ export default function ReviewForm({
     );
   }
 
-  async function handleContactFormSubmit() {
-    const ALL_CHECKS_PASS = [
-      checkEmail(),
-      checkFirstName(),
-      checkLastName(),
-    ].every(Boolean);
-
-    if (!ALL_CHECKS_PASS) return;
-    setContactFormLoading(true);
-    try {
-      const response = await postData(`/api/contact`, {
-        firstName,
-        lastName,
-        email,
-        businessId,
-        reviewId: review._id,
-      });
-      setContactSuccessMessage("Thank you for your contact!");
-      router.push("/");
-    } catch (err: any) {
-      setError((error) => ({
-        ...error,
-        apiError: err.message,
-      }));
-    } finally {
-      setContactFormLoading(false);
-    }
-  }
-
-  async function handlePostPositiveFeedback(platform: {
-    id: string;
-    name: string;
-    url: string;
-    total_reviews: number;
-  }) {
-    setPostReviewLoading(true);
-    try {
-      const response = await postData(`/api/review`, {
-        rating,
-        businessId,
-        locationId,
-        employeeId,
-        platform,
-      });
-      const { message } = response;
-      setReviewSuccessMessage(message);
-      setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
-      window.open(platform.url, "_blank");
-    } catch (err: any) {
-      setError((error) => ({
-        ...error,
-        apiError: err.message,
-      }));
-    } finally {
-      setPostReviewLoading(false);
-    }
-  }
-
-  async function handlePostNegativeFeedback() {
-    setPostReviewLoading(true);
-    try {
-      const response = await postData(`/api/review`, {
-        rating,
-        feedback: negativeFeedback,
-        businessId,
-        locationId,
-        employeeId,
-      });
-      const { message, data } = response;
-      setReview(data);
-      setReviewSuccessMessage(message);
-      setCurrentStep(NEGATIVE_FEEDBACK_THANK_YOU);
-    } catch (err: any) {
-      setError((error) => ({
-        ...error,
-        apiError: err.message,
-      }));
-    } finally {
-      setPostReviewLoading(false);
-    }
-  }
-
   const LANDING_PAGE_COMPONENT = (
     <div className="py-6 flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -384,8 +298,10 @@ export default function ReviewForm({
                 key={index}
                 type="button"
                 className="w-[150px] h-[150px] md:w-[200px] md:h-[200px] bg-white border border-stroke/20 rounded-[12px] shadow-card flex flex-col items-center justify-center gap-6"
-                onClick={() => handlePostPositiveFeedback(platform)}
-                disabled={postReviewLoading}
+                onClick={() => {
+                  setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
+                  window.open(platform.url, "_blank");
+                }}
               >
                 <Image
                   src={`/${platform.id}.svg`}
@@ -401,11 +317,6 @@ export default function ReviewForm({
             );
           })}
         </div>
-        {postReviewLoading && (
-          <p className="text-base leading-6 text-subHeading">
-            posting your review...
-          </p>
-        )}
         {error.apiError && (
           <ApiError
             message={error.apiError}
@@ -474,7 +385,6 @@ export default function ReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            isDisabled={postReviewLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
             buttonText="Cancel"
             onClick={() => {
@@ -482,8 +392,6 @@ export default function ReviewForm({
             }}
           />
           <Button
-            isDisabled={postReviewLoading}
-            isLoading={postReviewLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
             buttonText="Continue"
             onClick={() => {
@@ -494,7 +402,7 @@ export default function ReviewForm({
                 });
                 return;
               }
-              handlePostNegativeFeedback();
+              setCurrentStep(NEGATIVE_FEEDBACK_THANK_YOU);
             }}
           />
         </div>
@@ -588,7 +496,6 @@ export default function ReviewForm({
               }))
             }
             error={error.firstNameError}
-            disabled={contactFormLoading}
           />
           <Input
             type="text"
@@ -602,7 +509,6 @@ export default function ReviewForm({
               }))
             }
             error={error.lastNameError}
-            disabled={contactFormLoading}
           />
           <Input
             type="email"
@@ -616,7 +522,6 @@ export default function ReviewForm({
               }))
             }
             error={error.emailError}
-            disabled={contactFormLoading}
           />
           {error.apiError && (
             <ApiError
@@ -640,7 +545,6 @@ export default function ReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            isDisabled={contactFormLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
             buttonText="Form Reset"
             onClick={() => {
@@ -652,12 +556,17 @@ export default function ReviewForm({
             }}
           />
           <Button
-            isDisabled={contactFormLoading}
-            isLoading={contactFormLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
             buttonText="Submit"
             onClick={() => {
-              handleContactFormSubmit();
+              const ALL_CHECKS_PASS = [
+                checkEmail(),
+                checkFirstName(),
+                checkLastName(),
+              ].every(Boolean);
+
+              if (!ALL_CHECKS_PASS) return;
+              router.push("/");
             }}
           />
         </div>
