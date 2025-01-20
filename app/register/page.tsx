@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
 import Image from "next/image";
+import { useBusinessContext } from "@/context/businessContext";
 
 export default function Register() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function Register() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessPhoneNumber, setBusinessPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState({
     emailError: "",
@@ -22,13 +25,14 @@ export default function Register() {
     confirmPasswordError: "",
     firstNameError: "",
     lastNameError: "",
-    timeZoneError: "",
+    businessNameError: "",
     apiError: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   // CONTEXT
   const { setUser } = useUserContext();
+  const { setBusiness } = useBusinessContext();
 
   function checkEmail() {
     if (!email) {
@@ -82,6 +86,21 @@ export default function Register() {
     return true;
   }
 
+  function checkBusinessName() {
+    if (!businessName) {
+      setError((error) => ({
+        ...error,
+        businessNameError: "Business Name is required",
+      }));
+      return false;
+    }
+    setError((error) => ({
+      ...error,
+      businessNameError: "",
+    }));
+    return true;
+  }
+
   function checkPassword() {
     if (!password) {
       setError((error) => ({
@@ -119,6 +138,7 @@ export default function Register() {
       checkFirstName(),
       checkLastName(),
       checkConfirmPassword(),
+      checkBusinessName(),
     ].every(Boolean);
 
     if (!ALL_CHECKS_PASS) return;
@@ -130,18 +150,23 @@ export default function Register() {
         lastName,
         email,
         password,
+        businessName,
+        businessPhoneNumber,
       });
       const { data } = response;
-      if (data) {
+      const { user, business } = data;
+      if (user && business) {
         try {
           if (typeof window !== "undefined") {
-            localStorage.setItem("userId", data._id);
-            localStorage.setItem("token", data.token);
+            localStorage.setItem("userId", user._id);
+            localStorage.setItem("businessId", business._id);
+            localStorage.setItem("token", user.token);
           }
         } catch (error) {
           console.error("Error while setting token in localStorage:", error);
         }
-        setUser(data);
+        setUser(user);
+        setBusiness(business);
         return router.push(`/email-not-verified`);
       }
     } catch (err: any) {
@@ -223,6 +248,30 @@ export default function Register() {
                   placeholder="Enter your email address"
                   onChange={(event) => setEmail(event.target.value)}
                   error={error.emailError}
+                  disabled={isLoading}
+                />
+                <Input
+                  type="text"
+                  label="Business Name"
+                  value={businessName}
+                  placeholder="Enter your business name"
+                  onChange={(event) => setBusinessName(event.target.value)}
+                  error={error.businessNameError}
+                  disabled={isLoading}
+                />
+                <Input
+                  type="number"
+                  label="Business Telephone"
+                  helpertext="Optional"
+                  maxLength={10}
+                  placeholder="Enter your phone number"
+                  value={businessPhoneNumber}
+                  onChange={(event) => {
+                    if (event.target.value.length <= 10) {
+                      setBusinessPhoneNumber(event.target.value);
+                    }
+                    return;
+                  }}
                   disabled={isLoading}
                 />
                 <Input

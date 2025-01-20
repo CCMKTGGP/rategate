@@ -10,21 +10,12 @@ const BusinessSchema = new Schema(
       type: String,
       required: true,
     },
-    is_email_verified: {
-      type: Boolean,
-      default: false,
-    },
-    number_of_retries: {
-      type: Number,
-    },
-    verify_token: {
-      type: String,
-    },
-    verify_token_expire: {
-      type: Date,
-    },
     phone_number: {
       type: String,
+    },
+    logo_url: {
+      type: String,
+      default: null,
     },
     platforms: {
       type: Array<{

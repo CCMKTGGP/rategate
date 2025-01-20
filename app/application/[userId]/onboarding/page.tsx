@@ -2,11 +2,10 @@
 import { IPlatform } from "@/app/api/location/interface";
 import ApiError from "@/app/components/api-error";
 import Button from "@/app/components/button";
-import Input from "@/app/components/input";
 import OnboardingMarker from "@/app/components/onboarding-marker";
 import PlatformCheckbox from "@/app/components/platform-checkbox";
 import {
-  COLLECT_BUSINESS_INFO,
+  COLLECT_SURVEY,
   ONBOARDING_STEPS,
   SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
@@ -16,27 +15,21 @@ import {
 } from "@/constants/onboarding_platforms";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
-import { postData } from "@/utils/fetch";
+import { postData, putData } from "@/utils/fetch";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export default function Onboarding() {
   const { user } = useUserContext();
-  const { setBusiness } = useBusinessContext();
+  const { business, setBusiness } = useBusinessContext();
   const router = useRouter();
 
   // STATES
-  const [currentStep, setCurrentStep] = useState(COLLECT_BUSINESS_INFO);
+  const [currentStep, _] = useState(SELECT_PLATFORMS);
   const [state, setState] = useState<{
-    name: string;
-    email: string;
-    phoneNumber: string;
     platforms: Array<IPlatform>;
   }>({
-    name: "",
-    email: "",
-    phoneNumber: "",
     platforms: [],
   });
   const [error, setError] = useState({
@@ -49,126 +42,12 @@ export default function Onboarding() {
   const [isLoading, setIsLoading] = useState(false);
 
   // destructure the state
-  const { name, email, phoneNumber, platforms } = state;
-
-  function checkEmail() {
-    if (!email) {
-      setError((error) => ({
-        ...error,
-        emailError: "Business Email is required",
-      }));
-      return false;
-    }
-    if (!email.includes("@")) {
-      setError((error) => ({
-        ...error,
-        emailError: "Please enter a valid email",
-      }));
-      return false;
-    }
-    setError((error) => ({
-      ...error,
-      emailError: "",
-    }));
-    return true;
-  }
-
-  function checktName() {
-    if (!name) {
-      setError((error) => ({
-        ...error,
-        nameError: "Business Name is required",
-      }));
-      return false;
-    }
-    setError((error) => ({
-      ...error,
-      nameError: "",
-    }));
-    return true;
-  }
+  const { platforms } = state;
 
   function isValidURL(url: string) {
     const urlRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i;
     return urlRegex.test(url);
   }
-
-  const BUSINESS_INFO_COMPONENT = (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
-          Tell us more about your business
-        </h1>
-      </div>
-      <div className="flex flex-col gap-4">
-        <form className="w-full lg:w-[500px]">
-          <Input
-            type="text"
-            label="Business Name"
-            value={name}
-            placeholder="Enter your business name"
-            onChange={(event) =>
-              setState((prev) => ({
-                ...prev,
-                name: event.target.value,
-              }))
-            }
-            error={error.nameError}
-            disabled={isLoading}
-          />
-          <Input
-            type="email"
-            value={email}
-            label="Business Email"
-            placeholder="Enter your business email address"
-            onChange={(event) =>
-              setState((prev) => ({
-                ...prev,
-                email: event.target.value,
-              }))
-            }
-            error={error.emailError}
-            disabled={isLoading}
-          />
-          <Input
-            type="number"
-            label="Business Telephone"
-            helpertext="Optional"
-            maxLength={10}
-            placeholder="Enter your phone number"
-            value={phoneNumber}
-            onChange={(event) => {
-              if (event.target.value.length <= 10) {
-                setState((prev) => ({
-                  ...prev,
-                  phoneNumber: event.target.value,
-                }));
-              }
-              return;
-            }}
-            error={error.phoneNumberError}
-            disabled={isLoading}
-          />
-          <div className="flex justify-end my-6">
-            <Button
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-              buttonText="Continue"
-              onClick={() => {
-                const ALL_CHECKS_PASS = [checktName(), checkEmail()].every(
-                  Boolean
-                );
-
-                if (!ALL_CHECKS_PASS) return;
-                setCurrentStep(SELECT_PLATFORMS);
-              }}
-            />
-          </div>
-        </form>
-      </div>
-    </div>
-  );
 
   const SELECT_PLATFORMS_COMPONENT = (
     <div className="flex flex-col gap-8">
@@ -186,7 +65,7 @@ export default function Onboarding() {
         <form className="w-full lg:w-[500px]">
           {PLATFORMS.map(({ id, platformName, helperText, label }) => {
             //  add placeholder here
-            const placeholder = getPlatformPlaceholder(id, name);
+            const placeholder = getPlatformPlaceholder(id, business.name);
             const selectedPlatform = platforms.filter(
               (platform) => platform.id.toLowerCase() === id.toLowerCase()
             );
@@ -263,23 +142,14 @@ export default function Onboarding() {
               }
             />
           )}
-          <div className="flex justify-between mt-12 mb-6">
-            <Button
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
-              buttonText="Back"
-              onClick={() => {
-                setCurrentStep(COLLECT_BUSINESS_INFO);
-              }}
-            />
+          <div className="flex justify-start mt-12 mb-6">
             <Button
               isDisabled={isLoading}
               isLoading={isLoading}
               buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
               buttonText="Continue"
               onClick={() => {
-                handleCreateBusiness();
+                handleUpdateBusiness();
               }}
             />
           </div>
@@ -288,7 +158,7 @@ export default function Onboarding() {
     </div>
   );
 
-  async function handleCreateBusiness() {
+  async function handleUpdateBusiness() {
     // check whether all the urls added are in correct format
     const validUrls = platforms.filter((platform: IPlatform) =>
       platform.url.trim()
@@ -310,26 +180,20 @@ export default function Onboarding() {
     }));
     setIsLoading(true);
     try {
-      const response = await postData("/api/business", {
-        userId: user?._id,
-        name,
-        email,
-        phoneNumber,
-        platforms,
+      const response = await putData(`/api/business/${business._id}`, {
+        data: {
+          platforms,
+        },
       });
       const { data } = response;
       if (data) {
-        try {
-          if (typeof window !== "undefined") {
-            localStorage.setItem("businessId", data._id);
-          }
-        } catch (error) {
-          console.error("Error while setting token in localStorage:", error);
-        }
         setBusiness(data);
-        return router.push(
-          `/application/${user?._id}/onboarding/email-not-verified`
-        );
+        const res = await postData("/api/update-onboarding-step", {
+          userId: user._id,
+          businessId: business._id,
+          onboardingStep: COLLECT_SURVEY,
+        });
+        return router.push(`/application/${user?._id}/collect-survey`);
       }
     } catch (err: any) {
       setError((error) => ({
@@ -361,23 +225,12 @@ export default function Onboarding() {
               currentStep={ONBOARDING_STEPS.indexOf(currentStep) + 1}
               totalSteps={ONBOARDING_STEPS.length}
             />
-            {currentStep === COLLECT_BUSINESS_INFO && BUSINESS_INFO_COMPONENT}
             {currentStep === SELECT_PLATFORMS && SELECT_PLATFORMS_COMPONENT}
           </div>
         </div>
       </div>
       <div className="hidden lg:block w-[50%] h-full">
         <div className="h-full flex flex-col items-center gap-8">
-          {currentStep === COLLECT_BUSINESS_INFO && (
-            <Image
-              src="/onboarding-step-1.png"
-              alt="Onboarding Step 1"
-              className="h-[250px]"
-              width={450}
-              height={250}
-              priority
-            />
-          )}
           {currentStep === SELECT_PLATFORMS && (
             <Image
               src="/onboarding-step-2.png"

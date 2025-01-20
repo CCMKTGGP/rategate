@@ -1,8 +1,7 @@
 "use client";
 import {
-  BUSINESS_EMAIL_NOT_VERIFIED,
-  COLLECT_BUSINESS_INFO,
   COLLECT_SURVEY,
+  SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
 import { fetchData } from "@/utils/fetch";
 import { usePathname, useRouter } from "next/navigation";
@@ -61,16 +60,10 @@ export function UserContext({ children }: { children: React.ReactNode }) {
           router.push("/email-not-verified");
         }
         if (
-          (!data?.business_id ||
-            data.current_onboarding_step === COLLECT_BUSINESS_INFO) &&
+          data.current_onboarding_step === SELECT_PLATFORMS &&
           !authPathNames.includes(pathname)
         ) {
           return router.push(`/application/${data?._id}/onboarding`);
-        }
-        if (data?.current_onboarding_step === BUSINESS_EMAIL_NOT_VERIFIED) {
-          return router.push(
-            `/application/${data?._id}/onboarding/email-not-verified`
-          );
         }
         if (
           data.current_onboarding_step === COLLECT_SURVEY &&

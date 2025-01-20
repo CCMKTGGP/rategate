@@ -20,6 +20,7 @@ import ApiSuccess from "../api-success";
 import ApiError from "../api-error";
 import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
+import { isPaidBusiness } from "@/utils/planTypes";
 
 export default function ReviewForm({
   businessId,
@@ -200,6 +201,30 @@ export default function ReviewForm({
     }
     return (
       business?.platforms?.filter((platform) => platform?.url !== "") || []
+    );
+  }
+
+  function renderLogoOfBusiness() {
+    if (isPaidBusiness(business)) {
+      return (
+        <Image
+          src={business?.logo_url || ""}
+          alt={`Logo of ${business?.name}`}
+          width={100}
+          height={100}
+          priority
+        />
+      );
+    }
+    return (
+      <Image
+        src="/logo.png"
+        alt="Logo of Rategate"
+        className="h-8"
+        width={135}
+        height={50}
+        priority
+      />
     );
   }
 
@@ -680,16 +705,7 @@ export default function ReviewForm({
   if (noBusinessError) {
     return (
       <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-        <div className="py-4">
-          <Image
-            src="/logo.png"
-            alt="Logo of Rategate"
-            className="h-8"
-            width={135}
-            height={50}
-            priority
-          />
-        </div>
+        <div className="py-4">{renderLogoOfBusiness()}</div>
         <div className="py-6 flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
@@ -717,16 +733,7 @@ export default function ReviewForm({
   if (!isAllowedToReview) {
     return (
       <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-        <div className="py-4">
-          <Image
-            src="/logo.png"
-            alt="Logo of Rategate"
-            className="h-8"
-            width={135}
-            height={50}
-            priority
-          />
-        </div>
+        <div className="py-4">{renderLogoOfBusiness()}</div>
         <div className="py-6 flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
@@ -754,16 +761,7 @@ export default function ReviewForm({
   if (getPlatformsBasedOnId()?.length <= 0) {
     return (
       <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-        <div className="py-4">
-          <Image
-            src="/logo.png"
-            alt="Logo of Rategate"
-            className="h-8"
-            width={135}
-            height={50}
-            priority
-          />
-        </div>
+        <div className="py-4">{renderLogoOfBusiness()}</div>
         <div className="py-6 flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
@@ -791,16 +789,7 @@ export default function ReviewForm({
 
   return (
     <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-      <div className="py-4">
-        <Image
-          src="/logo.png"
-          alt="Logo of Rategate"
-          className="h-8"
-          width={135}
-          height={50}
-          priority
-        />
-      </div>
+      <div className="py-4">{renderLogoOfBusiness()}</div>
       <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
         {business?.name}
       </h1>

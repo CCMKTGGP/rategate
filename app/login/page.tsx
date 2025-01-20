@@ -9,9 +9,8 @@ import ApiError from "../components/api-error";
 import Button from "../components/button";
 import { postData } from "@/utils/fetch";
 import {
-  BUSINESS_EMAIL_NOT_VERIFIED,
-  COLLECT_BUSINESS_INFO,
   COLLECT_SURVEY,
+  SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
 import Image from "next/image";
 
@@ -90,36 +89,26 @@ export default function Login() {
       if (!data?.is_verified) {
         return router.push(`/email-not-verified`);
       }
-      if (
-        !data?.business_id ||
-        data.current_onboarding_step === COLLECT_BUSINESS_INFO
-      ) {
-        return router.push(`/application/${data?._id}/onboarding`);
-      }
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("businessId", data.business_id);
-
-          // check if the business email is verified
-          if (data?.current_onboarding_step === BUSINESS_EMAIL_NOT_VERIFIED) {
-            return router.push(
-              `/application/${data?._id}/onboarding/email-not-verified`
-            );
-          }
-
-          // check if the survey is collected or not
-          if (data.current_onboarding_step === COLLECT_SURVEY) {
-            return router.push(`/application/${data?._id}/collect-survey`);
-          }
-
-          // redirect to dashboard
-          return router.push(
-            `/application/${data?._id}/${data?.business_id}/dashboard`
-          );
         }
       } catch (error) {
         console.error("Error while setting token in localStorage:", error);
       }
+      if (data.current_onboarding_step === SELECT_PLATFORMS) {
+        return router.push(`/application/${data?._id}/onboarding`);
+      }
+
+      // check if the survey is collected or not
+      if (data.current_onboarding_step === COLLECT_SURVEY) {
+        return router.push(`/application/${data?._id}/collect-survey`);
+      }
+
+      // redirect to dashboard
+      return router.push(
+        `/application/${data?._id}/${data?.business_id}/dashboard`
+      );
     } catch (err: any) {
       setError((error) => ({
         ...error,
