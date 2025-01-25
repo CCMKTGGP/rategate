@@ -1,4 +1,4 @@
-import FakeReviewForm from "@/app/components/fake-review-form";
+import CustomerFlowReviewForm from "@/app/components/customer-flow-review-form";
 import React from "react";
 
 type Params = Promise<{
@@ -10,7 +10,7 @@ type Params = Promise<{
 export default async function Review({ params }: { params: Params }) {
   const { businessId, locationId, employeeId } = await params;
   return (
-    <FakeReviewForm
+    <CustomerFlowReviewForm
       businessId={businessId}
       locationId={locationId}
       employeeId={employeeId}

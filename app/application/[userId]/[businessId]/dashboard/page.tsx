@@ -343,7 +343,7 @@ export default function Dashboard() {
                   }}
                 />
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/fake-review`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow`}
                   target="_blank"
                   className="px-8 py-3 rounded-md hover:shadow-buttonHover text-primary bg-white font-semibold"
                 >

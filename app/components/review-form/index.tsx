@@ -20,7 +20,6 @@ import ApiSuccess from "../api-success";
 import ApiError from "../api-error";
 import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
-import { isPaidBusiness } from "@/utils/planTypes";
 
 export default function ReviewForm({
   businessId,
@@ -205,7 +204,7 @@ export default function ReviewForm({
   }
 
   function renderLogoOfBusiness() {
-    if (isPaidBusiness(business)) {
+    if (business?.logo_url) {
       return (
         <Image
           src={business?.logo_url || ""}

@@ -498,7 +498,7 @@ export default function ViewLocationClient({
                     }}
                   />
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/fake-review/${_id}`}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow/${_id}`}
                     target="_blank"
                     className="px-8 py-3 rounded-md hover:shadow-buttonHover bg-white text-primary font-semibold"
                   >
