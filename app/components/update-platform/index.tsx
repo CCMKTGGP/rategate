@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { IUpdatePlatformsProps, PLATFORM_TYPES } from "./interface";
-import { PLATFORMS } from "@/constants/onboarding_platforms";
+import {
+  getPlatformPlaceholder,
+  PLATFORMS,
+} from "@/constants/onboarding_platforms";
 import PlatformCheckbox from "../platform-checkbox";
 import ApiError from "../api-error";
 import Button from "../button";
 import { IPlatform } from "@/app/api/location/interface";
 import { putData } from "@/utils/fetch";
+import { useBusinessContext } from "@/context/businessContext";
 
 export default function UpdatePlatforms({
   businessId,
@@ -15,6 +19,7 @@ export default function UpdatePlatforms({
   onCancel,
   onConfirm,
 }: IUpdatePlatformsProps) {
+  const { business } = useBusinessContext();
   const [businessPlatforms, setBusinessPlatforms] = useState(platforms);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
@@ -79,7 +84,8 @@ export default function UpdatePlatforms({
           </h3>
           <div className="flex flex-col gap-4">
             <form className="w-full">
-              {PLATFORMS.map(({ id, name, helperText, label }) => {
+              {PLATFORMS.map(({ id, platformName, helperText, label }) => {
+                const placeholder = getPlatformPlaceholder(id, business.name);
                 const selectedPlatform = businessPlatforms.filter(
                   (platform) => platform.id.toLowerCase() === id.toLowerCase()
                 );
@@ -87,8 +93,14 @@ export default function UpdatePlatforms({
                 return (
                   <div key={id}>
                     <PlatformCheckbox
+                      placeholder={placeholder}
                       url={selectedPlatform[0]?.url}
-                      platform={{ id, name, helpertext: helperText, label }}
+                      platform={{
+                        id,
+                        name: platformName,
+                        helpertext: helperText,
+                        label,
+                      }}
                       checked={checked}
                       onSelect={({ id, name }) => {
                         let updatedPlatforms = businessPlatforms;

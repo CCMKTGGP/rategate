@@ -8,6 +8,10 @@ import { cookies } from "next/headers";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTempelate";
 import { sendEmail } from "@/utils/sendEmail";
 import { IUser } from "@/context/userContext";
+import Plan from "@/lib/models/plan";
+import { PlanTypes } from "@/utils/planTypes";
+import Business from "@/lib/models/business";
+import { Types } from "mongoose";
 
 function getVerificationToken(user: IUser): string {
   // Generate the token
@@ -25,7 +29,14 @@ function getVerificationToken(user: IUser): string {
 
 export const POST = async (request: Request) => {
   try {
-    const { firstName, lastName, email, password } = await request.json();
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      businessName,
+      businessPhoneNumber,
+    } = await request.json();
 
     // encrypt the password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -44,6 +55,22 @@ export const POST = async (request: Request) => {
       );
     }
 
+    // fetch all plans
+    const plans = await Plan.find();
+
+    const freePlan: any = plans.filter(
+      (plan) => plan.plan_id === PlanTypes.BASIC.toLowerCase()
+    );
+
+    // create the new business object
+    const newBusiness = new Business({
+      name: businessName,
+      email,
+      phone_number: businessPhoneNumber,
+      plan_id: new Types.ObjectId(freePlan?.[0]?._id),
+    });
+    await newBusiness.save();
+
     // create the new user object
     const newUser = new User({
       first_name: firstName,
@@ -51,6 +78,7 @@ export const POST = async (request: Request) => {
       email,
       password: hashedPassword,
       number_of_retries: 0,
+      business_id: new Types.ObjectId(newBusiness._id),
     });
 
     // generate a verification token for the user and save it in the database
@@ -75,7 +103,10 @@ export const POST = async (request: Request) => {
     });
 
     return new NextResponse(
-      JSON.stringify({ message: "User created successfully!", data: response }),
+      JSON.stringify({
+        message: "User created successfully!",
+        data: { user: response, business: newBusiness },
+      }),
       {
         status: 201,
       }

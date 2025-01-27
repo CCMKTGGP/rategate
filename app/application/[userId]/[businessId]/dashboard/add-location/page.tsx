@@ -6,7 +6,10 @@ import Input from "@/app/components/input";
 import PlatformCheckbox from "@/app/components/platform-checkbox";
 import Sidebar from "@/app/components/sidebar";
 import TopBar from "@/app/components/topbar";
-import { PLATFORMS } from "@/constants/onboarding_platforms";
+import {
+  getPlatformPlaceholder,
+  PLATFORMS,
+} from "@/constants/onboarding_platforms";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { postData } from "@/utils/fetch";
@@ -176,12 +179,13 @@ export default function AddLocation() {
     <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30 flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <p className="text-base leading-6 text-heading w-[80%]">
-          {"Choose the platforms where you'd like to collect reviews."}
+          {`Choose the platforms where you'd like to collect reviews for this location - ${name}.`}
         </p>
       </div>
       <div className="flex flex-col gap-4">
         <form className="w-[500px]">
-          {PLATFORMS.map(({ id, name, helperText, label }) => {
+          {PLATFORMS.map(({ id, platformName, helperText, label }) => {
+            const placeholder = getPlatformPlaceholder(id, business.name);
             const selectedPlatform = platforms.filter(
               (platform) => platform.id.toLowerCase() === id.toLowerCase()
             );
@@ -189,8 +193,14 @@ export default function AddLocation() {
             return (
               <div key={id}>
                 <PlatformCheckbox
+                  placeholder={placeholder}
                   url={selectedPlatform[0]?.url}
-                  platform={{ id, name, helpertext: helperText, label }}
+                  platform={{
+                    id,
+                    name: platformName,
+                    helpertext: helperText,
+                    label,
+                  }}
                   checked={checked}
                   onSelect={({ id, name }) => {
                     let updatedPlatforms = platforms;
@@ -285,10 +295,10 @@ export default function AddLocation() {
           </div>
           <div className="flex flex-col pb-8">
             <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
-              Create Location
+              Add Location
             </h3>
             <p className="text-base leading-[24px] font-medium text-subHeading ">
-              Create your location. Each location is $10/Month
+              Create your location. Each location is $10/Month.
             </p>
           </div>
           {currentStep.toLowerCase() === COLLECT_LOCATION_INFO.toLowerCase() &&
