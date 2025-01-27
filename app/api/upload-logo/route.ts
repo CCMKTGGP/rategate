@@ -65,8 +65,6 @@ export const POST = async (request: NextRequest) => {
     // Extract the secure URL from Cloudinary
     const logoUrl = uploadResult.secure_url;
 
-    console.log("logoURl", logoUrl);
-
     // update the business
     const updatedBusiness = await Business.findOneAndUpdate(
       { _id: business._id },
