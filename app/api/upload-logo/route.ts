@@ -1,9 +1,15 @@
-import fs from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Business from "@/lib/models/business";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -40,20 +46,24 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    // Save the file to the local disk
-    const uploadsDir = path.join(process.cwd(), "/public/uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const fileName = `${Date.now()}-${file.name.replace(/\s/g, "-")}`;
-    const filePath = path.join(uploadsDir, fileName);
-
+    // Convert the file to a Buffer
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    fs.writeFileSync(filePath, fileBuffer);
 
-    // Update the business with the new logo URL
-    const logoUrl = `/uploads/${fileName}`;
+    // Upload the file to Cloudinary
+    const uploadResult: any = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { folder: "business_logos" }, // Specify the folder in Cloudinary
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        )
+        .end(fileBuffer); // Pipe the buffer into Cloudinary's stream
+    });
+
+    // Extract the secure URL from Cloudinary
+    const logoUrl = uploadResult.secure_url;
 
     // update the business
     const updatedBusiness = await Business.findOneAndUpdate(
