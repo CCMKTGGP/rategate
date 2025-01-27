@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { UserContext } from "@/context/userContext";
 import { BusinessContext } from "@/context/businessContext";
@@ -15,6 +16,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '${process.env.GOOGLE_ANALYTICS_ID}');
+        `}
+        </Script>
+      </head>
       <body className="antialiased">
         <UserContext>
           <BusinessContext>{children}</BusinessContext>
