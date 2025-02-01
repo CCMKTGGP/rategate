@@ -269,7 +269,7 @@ export default function Account() {
                         isDisabled={isLoading || uploadFileLoading || !file}
                         isLoading={uploadFileLoading}
                         buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-                        buttonText="Update"
+                        buttonText="Upload"
                         onClick={() => {
                           handleUploadFile();
                         }}
