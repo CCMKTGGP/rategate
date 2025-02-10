@@ -183,7 +183,7 @@ export default function AddLocation() {
         </p>
       </div>
       <div className="flex flex-col gap-4">
-        <form className="w-[500px]">
+        <div className="w-[500px]">
           {PLATFORMS.map(({ id, platformName, helperText, label }) => {
             const placeholder = getPlatformPlaceholder(id, business.name);
             const selectedPlatform = platforms.filter(
@@ -274,7 +274,7 @@ export default function AddLocation() {
               onClick={() => handleAddLocation()}
             />
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

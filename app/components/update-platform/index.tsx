@@ -83,7 +83,7 @@ export default function UpdatePlatforms({
             Update platforms
           </h3>
           <div className="flex flex-col gap-4">
-            <form className="w-full">
+            <div className="w-full">
               {PLATFORMS.map(({ id, platformName, helperText, label }) => {
                 const placeholder = getPlatformPlaceholder(id, business.name);
                 const selectedPlatform = businessPlatforms.filter(
@@ -174,7 +174,7 @@ export default function UpdatePlatforms({
                   }}
                 />
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>

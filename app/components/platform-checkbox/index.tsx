@@ -15,10 +15,14 @@ export default function PlatformCheckbox({
   const { id, name, helpertext } = platform;
 
   return (
-    <div
+    <form
       className={`my-2 py-2 flex flex-col gap-2 rounded-[8px]  ${
         checked ? "bg-[#FAFAFB]" : "bg-transparent"
       }`}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
     >
       <button
         type="button"
@@ -51,6 +55,6 @@ export default function PlatformCheckbox({
           />
         </div>
       )}
-    </div>
+    </form>
   );
 }

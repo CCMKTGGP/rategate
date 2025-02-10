@@ -23,6 +23,9 @@ export default function Dashboard() {
 
   const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [locations, setLocations] = useState<ILocation[]>([]);
+  const [negativeReviews, setNegativeReviews] = useState(0);
+  const [fetchNegativeReviewsLoading, setFetchNegativeReviewsLoading] =
+    useState(true);
   const [downloadQrCodeLoading, setDownloadQrCodeLoading] = useState(false);
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [successDeleteMessage, setSuccessDeleteMessage] = useState("");
@@ -42,6 +45,21 @@ export default function Dashboard() {
     data: {},
   });
 
+  const fetchAllReviewsForBusiness = useCallback(async () => {
+    try {
+      const response = await fetchData(
+        `/api/business-reviews?businessId=${business._id}`
+      );
+      const { data } = response;
+      const filteredReviews = data.filter((review: any) => review.rating <= 3);
+      setNegativeReviews(filteredReviews.length);
+    } catch (err: any) {
+      setError((error) => ({ ...error, apiError: err.message }));
+    } finally {
+      setFetchNegativeReviewsLoading(false);
+    }
+  }, []);
+
   const fetchLocationsForBusiness = useCallback(async () => {
     try {
       const response = await fetchData(
@@ -60,6 +78,7 @@ export default function Dashboard() {
     if (business._id) {
       setFetchLocationLoading(true);
       fetchLocationsForBusiness();
+      fetchAllReviewsForBusiness();
     }
   }, [business]);
 
@@ -267,7 +286,7 @@ export default function Dashboard() {
               Dashboard
             </h3>
             <p className="text-base leading-[24px] font-medium text-subHeading ">
-              Manage your review platforms, add locations and team members
+              Manage your review platforms, add locations, and team members
               below.
             </p>
             <div className="bg-white py-4 mt-8">
@@ -372,7 +391,7 @@ export default function Dashboard() {
                   return (
                     <div
                       key={index}
-                      className="min-w-[120px] max-w-[120px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
+                      className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
                     >
                       <div className="flex flex-col items-center gap-2">
                         <Image
@@ -392,6 +411,25 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
+                <div className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <Image
+                      src={"/thumb-down.svg"}
+                      alt={"Thumb Down Svg"}
+                      width={40}
+                      height={40}
+                      priority
+                    />
+                    <p className="text-sm leading-md text-heading text-center px-2">
+                      Negative Reviews
+                    </p>
+                  </div>
+                  <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                    {fetchNegativeReviewsLoading
+                      ? "Fetching..."
+                      : `${negativeReviews} Reviews`}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

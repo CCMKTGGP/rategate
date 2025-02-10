@@ -34,7 +34,6 @@ export default function CustomerFlowReviewForm({
   const [business, setBusiness] = useState<IBusiness>();
   const [location, setLocation] = useState<ILocation>();
   const [employee, setEmployee] = useState<IEmployee>();
-  const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
   const [fetchBusinessDetailsLoading, setFetchBusinessDetailsLoading] =
     useState(true);
@@ -68,7 +67,6 @@ export default function CustomerFlowReviewForm({
         const response = await fetchData(`/api/business/${businessId}`);
         const { data } = response;
         setBusiness(data.business);
-        setIsAllowedToReview(data.is_allowed_to_review);
       } catch (err: any) {
         setNoBusinessError(true);
       } finally {
@@ -235,7 +233,7 @@ export default function CustomerFlowReviewForm({
       </div>
       <div className="flex flex-start">
         <Button
-          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
           buttonText="Start Your Review"
           onClick={() => {
             setCurrentStep(COLLECT_RATING);
@@ -287,7 +285,7 @@ export default function CustomerFlowReviewForm({
         <div className="flex flex-start">
           <Button
             isDisabled={rating <= 0}
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
               if (rating >= 4) {
@@ -409,14 +407,14 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="Cancel"
             onClick={() => {
               setCurrentStep(COLLECT_RATING);
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
               if (negativeFeedback === "") {
@@ -446,10 +444,10 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="End Review"
             onClick={() => {
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
         </div>
@@ -477,14 +475,14 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4 flex-wrap">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="End Review"
             onClick={() => {
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Add Contact Info"
             onClick={() => {
               setCurrentStep(COLLECT_CONTACT_INFO);
@@ -569,7 +567,7 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="Form Reset"
             onClick={() => {
               setContactFormDetails({
@@ -580,7 +578,7 @@ export default function CustomerFlowReviewForm({
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Submit"
             onClick={() => {
               const ALL_CHECKS_PASS = [
@@ -590,7 +588,7 @@ export default function CustomerFlowReviewForm({
               ].every(Boolean);
 
               if (!ALL_CHECKS_PASS) return;
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
         </div>
@@ -626,36 +624,8 @@ export default function CustomerFlowReviewForm({
           </div>
           <div className="flex flex-start">
             <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
               buttonText="Register Now"
-              onClick={() => {
-                router.push("/");
-              }}
-            />
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!isAllowedToReview) {
-    return (
-      <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-        <div className="py-4">{renderLogoOfBusiness()}</div>
-        <div className="py-6 flex flex-col gap-8">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
-              Maxed out free reviews!
-            </h2>
-            <p className="text-base leading-6 text-subHeading">
-              Your business has maxed out the free reviews on basic plan. Please
-              subscribe to a plan to get more reviews.
-            </p>
-          </div>
-          <div className="flex flex-start">
-            <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-              buttonText="Upgrade Now"
               onClick={() => {
                 router.push("/");
               }}
@@ -673,17 +643,16 @@ export default function CustomerFlowReviewForm({
         <div className="py-6 flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
-              No Providers Registered for the business
+              Oops, there are no registered review platforms for this business.
             </h2>
             <p className="text-base leading-6 text-subHeading">
-              With the given url, there is no business registered in our
-              database. Follow this link to update the providers for your
-              account at Rategate.
+              The business you're reviewing hasn't completed setting up its
+              RateGate account. Please encourage them to complete their setup.
             </p>
           </div>
           <div className="flex flex-start">
             <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
               buttonText="Update Now"
               onClick={() => {
                 router.push("/");

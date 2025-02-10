@@ -29,6 +29,9 @@ export default function ViewLocationClient({
   const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [state, setState] = useState<ILocation>({});
   const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [negativeReviews, setNegativeReviews] = useState(0);
+  const [fetchNegativeReviewsLoading, setFetchNegativeReviewsLoading] =
+    useState(true);
   const [fetchEmployeesLoading, setFetchEmployeesLoading] = useState(false);
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
@@ -80,6 +83,7 @@ export default function ViewLocationClient({
         setState(data);
         setFetchEmployeesLoading(true);
         fetchEmployeesForLocation(locationId);
+        fetchAllReviewsForLocation(locationId);
       } catch (err: any) {
         setError((error) => ({
           ...error,
@@ -107,6 +111,21 @@ export default function ViewLocationClient({
       setError((error) => ({ ...error, fetchMembersError: err.message }));
     } finally {
       setFetchEmployeesLoading(false);
+    }
+  }, []);
+
+  const fetchAllReviewsForLocation = useCallback(async (locationId: string) => {
+    try {
+      const response = await fetchData(
+        `/api/location-reviews?locationId=${locationId}`
+      );
+      const { data } = response;
+      const filteredReviews = data.filter((review: any) => review.rating <= 3);
+      setNegativeReviews(filteredReviews.length);
+    } catch (err: any) {
+      setError((error) => ({ ...error, apiError: err.message }));
+    } finally {
+      setFetchNegativeReviewsLoading(false);
     }
   }, []);
 
@@ -527,7 +546,7 @@ export default function ViewLocationClient({
                     return (
                       <div
                         key={index}
-                        className="min-w-[120px] max-w-[120px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
+                        className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
                       >
                         <div className="flex flex-col items-center gap-2">
                           <Image
@@ -547,16 +566,27 @@ export default function ViewLocationClient({
                       </div>
                     );
                   })}
+                  <div className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                    <div className="flex flex-col items-center gap-2">
+                      <Image
+                        src={"/thumb-down.svg"}
+                        alt={"Thumb Down Svg"}
+                        width={40}
+                        height={40}
+                        priority
+                      />
+                      <p className="text-sm leading-md text-heading text-center px-2">
+                        Negative Reviews
+                      </p>
+                    </div>
+                    <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                      {fetchNegativeReviewsLoading
+                        ? "Fetching..."
+                        : `${negativeReviews} Reviews`}
+                    </p>
+                  </div>
                 </div>
               </div>
-              {/* <div className="flex items-start gap-8 mt-6">
-                <div className="w-[43%]">
-                  
-                </div>
-                <div className="w-[57%]">
-                  
-                </div>
-              </div> */}
             </div>
           ) : null}
           <div className="flex flex-col pb-12 mt-4">

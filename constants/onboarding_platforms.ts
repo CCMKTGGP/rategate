@@ -8,7 +8,7 @@ export const PLATFORMS = [
   {
     id: "GOOGLE",
     platformName: "Google",
-    helperText: "Enter your Google business location url here",
+    helperText: "Enter your Google Business Profile URL here",
     label: "Label",
   },
   {
@@ -62,7 +62,7 @@ export function getPlatformPlaceholder(id: string, businessName: string) {
     case "GOOGLE":
       return `https://g.page/r/${businessName}/reviews`;
     case "TRUSTPILOT":
-      return `https://trustpilot.com/reveiws/${businessName}`;
+      return `https://trustpilot.com/reviews/${businessName}`;
     case "CAPTERRA":
       return `https://capterra.com/p/184192/${businessName}`;
     case "TRIPADVISOR":
