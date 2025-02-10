@@ -767,8 +767,8 @@ export default function ReviewForm({
               Oops, there are no registered review platforms for this business.
             </h2>
             <p className="text-base leading-6 text-subHeading">
-              The business you're reviewing hasn't completed setting up its
-              RateGate account. Please encourage them to complete their setup.
+              {`The business you're reviewing hasn't completed setting up its
+              RateGate account. Please encourage them to complete their setup.`}
             </p>
           </div>
           <div className="flex flex-start">
