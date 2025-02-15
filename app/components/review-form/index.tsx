@@ -22,13 +22,13 @@ import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
 
 export default function ReviewForm({
-  businessId,
-  locationId,
-  employeeId,
+  businessSlug,
+  locationSlug,
+  employeeSlug,
 }: {
-  businessId: string;
-  locationId?: string;
-  employeeId?: string;
+  businessSlug: string;
+  locationSlug?: string;
+  employeeSlug?: string;
 }) {
   const router = useRouter();
   const [review, setReview] = useState<any>();
@@ -69,7 +69,7 @@ export default function ReviewForm({
   useEffect(() => {
     async function getBusinessDetails() {
       try {
-        const response = await fetchData(`/api/business/${businessId}`);
+        const response = await fetchData(`/api/business-slug/${businessSlug}`);
         const { data } = response;
         setBusiness(data.business);
         setIsAllowedToReview(data.is_allowed_to_review);
@@ -80,16 +80,16 @@ export default function ReviewForm({
       }
     }
 
-    if (businessId) {
+    if (businessSlug) {
       getBusinessDetails();
     }
-  }, [businessId]);
+  }, [businessSlug]);
 
   useEffect(() => {
     async function getLocationDetails() {
       setFetchLocationDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/location/${locationId}`);
+        const response = await fetchData(`/api/location-slug/${locationSlug}`);
         const { data } = response;
         setLocation(data);
       } catch (err: any) {
@@ -99,16 +99,16 @@ export default function ReviewForm({
       }
     }
 
-    if (locationId) {
+    if (locationSlug) {
       getLocationDetails();
     }
-  }, [locationId]);
+  }, [locationSlug]);
 
   useEffect(() => {
     async function getEmployeeDetails() {
       setFetchEmployeeDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/employee/${employeeId}`);
+        const response = await fetchData(`/api/employee-slug/${employeeSlug}`);
         const { data } = response;
         setEmployee(data);
       } catch (err: any) {
@@ -118,10 +118,10 @@ export default function ReviewForm({
       }
     }
 
-    if (employeeId) {
+    if (employeeSlug) {
       getEmployeeDetails();
     }
-  }, [employeeId]);
+  }, [employeeSlug]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -193,7 +193,7 @@ export default function ReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationId) {
+    if (locationSlug) {
       return (
         location?.platforms?.filter((platform) => platform?.url !== "") || []
       );
@@ -219,7 +219,6 @@ export default function ReviewForm({
       <Image
         src="/logo.png"
         alt="Logo of Rategate"
-        className="h-8"
         width={135}
         height={50}
         priority
@@ -241,7 +240,7 @@ export default function ReviewForm({
         firstName,
         lastName,
         email,
-        businessId,
+        businessId: business?._id,
         reviewId: review._id,
       });
       setContactSuccessMessage("Thank you for your contact!");
@@ -266,9 +265,9 @@ export default function ReviewForm({
     try {
       const response = await postData(`/api/review`, {
         rating,
-        businessId,
-        locationId,
-        employeeId,
+        businessId: business?._id,
+        locationId: location?._id,
+        employeeId: employee?._id,
         platform,
       });
       const { message } = response;
@@ -291,9 +290,9 @@ export default function ReviewForm({
       const response = await postData(`/api/review`, {
         rating,
         feedback: negativeFeedback,
-        businessId,
-        locationId,
-        employeeId,
+        businessId: business?._id,
+        locationId: location?._id,
+        employeeId: employee?._id,
       });
       const { message, data } = response;
       setReview(data);

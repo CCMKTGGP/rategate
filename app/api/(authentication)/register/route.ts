@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import slugify from "slugify";
 import crypto from "crypto";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -62,12 +63,25 @@ export const POST = async (request: Request) => {
       (plan) => plan.plan_id === PlanTypes.BASIC.toLowerCase()
     );
 
+    // generate a unique slug for the business name
+    let newSlug = slugify(businessName, { lower: true, strict: true });
+    let existingBusinessWithSlugName = await Business.find({ slug: newSlug });
+
+    while (existingBusinessWithSlugName.length > 0) {
+      newSlug = `${slugify(businessName, {
+        lower: true,
+        strict: true,
+      })}-${existingBusinessWithSlugName.length + 1}`;
+      existingBusinessWithSlugName = await Business.find({ slug: newSlug });
+    }
+
     // create the new business object
     const newBusiness = new Business({
       name: businessName,
       email,
       phone_number: businessPhoneNumber,
       plan_id: new Types.ObjectId(freePlan?.[0]?._id),
+      slug: newSlug,
     });
     await newBusiness.save();
 

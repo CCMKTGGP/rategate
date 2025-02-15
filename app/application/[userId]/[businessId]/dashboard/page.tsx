@@ -109,7 +109,7 @@ export default function Dashboard() {
     setDownloadQrCodeLoading(true);
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -138,9 +138,9 @@ export default function Dashboard() {
 
     try {
       await navigator.share({
-        title: "Check out this review!",
-        text: "I found this review interesting. Take a look!",
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`,
+        title: "How Did We Do? Let Us Know!",
+        text: "Your feedback helps us improve. Please take a moment to let us know your thoughts",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review`,
       });
     } catch (err) {
       console.log("Error sharing:", err);
@@ -156,7 +156,7 @@ export default function Dashboard() {
     try {
       navigator.clipboard
         .writeText(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review`
         )
         .then(() => {
           setCopySuccess("Copied to clipboard!");
@@ -298,11 +298,11 @@ export default function Dashboard() {
               </p>
               <div className="py-4 flex items-center gap-4">
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review`}
                   target="_blank"
                   className="text-lg font-bold text-heading break-words underline"
                 >
-                  {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review`}
+                  {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review`}
                 </Link>
                 <div className="relative mt-2">
                   <button
@@ -362,7 +362,7 @@ export default function Dashboard() {
                   }}
                 />
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/customer-flow`}
                   target="_blank"
                   className="px-8 py-3 rounded-md hover:shadow-buttonHover text-primary bg-white font-semibold"
                 >

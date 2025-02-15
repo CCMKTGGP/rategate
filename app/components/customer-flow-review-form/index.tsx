@@ -22,13 +22,13 @@ import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
 
 export default function CustomerFlowReviewForm({
-  businessId,
-  locationId,
-  employeeId,
+  businessSlug,
+  locationSlug,
+  employeeSlug,
 }: {
-  businessId: string;
-  locationId?: string;
-  employeeId?: string;
+  businessSlug: string;
+  locationSlug?: string;
+  employeeSlug?: string;
 }) {
   const router = useRouter();
   const [business, setBusiness] = useState<IBusiness>();
@@ -64,7 +64,7 @@ export default function CustomerFlowReviewForm({
   useEffect(() => {
     async function getBusinessDetails() {
       try {
-        const response = await fetchData(`/api/business/${businessId}`);
+        const response = await fetchData(`/api/business-slug/${businessSlug}`);
         const { data } = response;
         setBusiness(data.business);
       } catch (err: any) {
@@ -74,16 +74,16 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (businessId) {
+    if (businessSlug) {
       getBusinessDetails();
     }
-  }, [businessId]);
+  }, [businessSlug]);
 
   useEffect(() => {
     async function getLocationDetails() {
       setFetchLocationDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/location/${locationId}`);
+        const response = await fetchData(`/api/location-slug/${locationSlug}`);
         const { data } = response;
         setLocation(data);
       } catch (err: any) {
@@ -93,16 +93,16 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (locationId) {
+    if (locationSlug) {
       getLocationDetails();
     }
-  }, [locationId]);
+  }, [locationSlug]);
 
   useEffect(() => {
     async function getEmployeeDetails() {
       setFetchEmployeeDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/employee/${employeeId}`);
+        const response = await fetchData(`/api/employee-slug/${employeeSlug}`);
         const { data } = response;
         setEmployee(data);
       } catch (err: any) {
@@ -112,10 +112,10 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (employeeId) {
+    if (employeeSlug) {
       getEmployeeDetails();
     }
-  }, [employeeId]);
+  }, [employeeSlug]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -187,7 +187,7 @@ export default function CustomerFlowReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationId) {
+    if (locationSlug) {
       return (
         location?.platforms?.filter((platform) => platform?.url !== "") || []
       );
@@ -213,7 +213,6 @@ export default function CustomerFlowReviewForm({
       <Image
         src="/logo.png"
         alt="Logo of Rategate"
-        className="h-8"
         width={135}
         height={50}
         priority

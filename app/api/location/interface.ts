@@ -11,4 +11,5 @@ export interface ILocation {
   total_reviews?: number;
   total_members?: number;
   platforms?: Array<IPlatform>;
+  slug?: string;
 }

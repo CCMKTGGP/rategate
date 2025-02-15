@@ -10,6 +10,10 @@ const BusinessSchema = new Schema(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+      unique: true,
+    },
     phone_number: {
       type: String,
     },

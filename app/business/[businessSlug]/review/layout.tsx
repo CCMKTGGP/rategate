@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 
 type Params = Promise<{
-  businessId: string;
-  locationId: string;
-  employeeId: string;
+  businessSlug: string;
 }>;
 
 // Fetch business information from API
-async function getBusinessInfo(businessId: string) {
+async function getBusinessInfo(businessSlug: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/business/${businessId}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/business-slug/${businessSlug}`,
     {
       cache: "no-store",
     }
@@ -30,8 +28,8 @@ export async function generateMetadata({
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const { businessId } = await params;
-  const business = await getBusinessInfo(businessId);
+  const { businessSlug } = await params;
+  const business = await getBusinessInfo(businessSlug);
 
   return {
     title: `${business.name}`,

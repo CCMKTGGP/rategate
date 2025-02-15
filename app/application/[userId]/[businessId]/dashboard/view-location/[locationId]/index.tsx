@@ -73,7 +73,7 @@ export default function ViewLocationClient({
   });
 
   // extract the state here.
-  const { _id, name, address, platforms } = state;
+  const { _id, name, address, platforms, slug: locationSlug } = state;
 
   // fetch location details in useEffect hook. This way, we only fetch when locationId changes.
   useEffect(() => {
@@ -178,7 +178,7 @@ export default function ViewLocationClient({
     setDownloadLocationQrCodeLoading(true);
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -204,7 +204,7 @@ export default function ViewLocationClient({
     }));
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}/${employee._id}`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}/${employee.slug}`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -237,9 +237,9 @@ export default function ViewLocationClient({
 
     try {
       await navigator.share({
-        title: `Check out this review for location ${name}!`,
-        text: "I found this review interesting. Take a look!",
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+        title: `How Did We Do? Let Us Know!`,
+        text: "Your feedback helps us improve. Please take a moment to let us know your thoughts",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}`,
       });
     } catch (err) {
       console.log("Error sharing:", err);
@@ -251,7 +251,7 @@ export default function ViewLocationClient({
     try {
       navigator.clipboard
         .writeText(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}`
         )
         .then(() => {
           setCopySuccess("Copied to clipboard!");
@@ -453,11 +453,11 @@ export default function ViewLocationClient({
                 </p>
                 <div className="py-4 flex items-center gap-4">
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}`}
                     target="_blank"
                     className="text-lg font-bold text-heading break-words underline"
                   >
-                    {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review/${name}`}
+                    {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/review/${locationSlug}`}
                   </Link>
                   <div className="relative mt-2">
                     <button
@@ -517,7 +517,7 @@ export default function ViewLocationClient({
                     }}
                   />
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow/${_id}`}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.slug}/customer-flow/${locationSlug}`}
                     target="_blank"
                     className="px-8 py-3 rounded-md hover:shadow-buttonHover bg-white text-primary font-semibold"
                   >
