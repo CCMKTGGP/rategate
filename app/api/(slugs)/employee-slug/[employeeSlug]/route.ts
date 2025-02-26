@@ -23,7 +23,7 @@ export const GET = async (request: Request, context: { params: Params }) => {
     await connect();
 
     // get employee details from employeeSlug
-    const employee = await Employee.find({ slug: employeeSlug });
+    const employee = await Employee.findOne({ slug: employeeSlug });
 
     if (!employee) {
       return new NextResponse(

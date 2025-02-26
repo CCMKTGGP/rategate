@@ -45,7 +45,7 @@ export const GET = async (request: Request, context: { params: Params }) => {
     // check if the business has reached the maximum number of reviews
     // fetch all the reviews where businessId is equal to params business id
     const reviews = await Review.find({
-      business_id: new Types.ObjectId(business.businessId),
+      business_id: new Types.ObjectId(business._id),
     });
 
     if (

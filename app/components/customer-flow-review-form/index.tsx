@@ -42,7 +42,7 @@ export default function CustomerFlowReviewForm({
   const [fetchEmployeeDetailsLoading, setFetchEmployeeDetailsLoading] =
     useState(false);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
-  const [negativeFeedback, setNegativeFeedback] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [contactSuccessMessage, setContactSuccessMessage] = useState("");
   const [contactFormDetails, setContactFormDetails] = useState({
     firstName: "",
@@ -53,7 +53,7 @@ export default function CustomerFlowReviewForm({
     firstNameError: "",
     lastNameError: "",
     emailError: "",
-    negativeFeedbackError: "",
+    feedbackError: "",
     apiError: "",
   });
   const [noBusinessError, setNoBusinessError] = useState(false);
@@ -258,7 +258,14 @@ export default function CustomerFlowReviewForm({
           <div className="flex items-center gap-4">
             {Array.from({ length: 5 }, (_, index) => {
               return index < rating ? (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-filled.png"
                     alt="Filled rating image"
@@ -268,7 +275,14 @@ export default function CustomerFlowReviewForm({
                   />
                 </button>
               ) : (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-empty.png"
                     alt="Empty rating image"
@@ -338,6 +352,73 @@ export default function CustomerFlowReviewForm({
             );
           })}
         </div>
+        <hr className="w-full lg:w-[50%]" />
+        <div className="flex flex-col gap-4 w-full lg:w-[50%]">
+          <p className="text-2xl leading-8 text-heading font-archivo font-bold">
+            Share response privately
+          </p>
+          <div className="flex flex-col">
+            <label
+              htmlFor="positive-feedback"
+              className="block text-sm text-heading mb-2 font-inter font-bold"
+            >
+              Response
+            </label>
+            <textarea
+              id="positive-feedback"
+              name="positive-feedback"
+              className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
+                error.feedbackError !== "" ? "border-error" : "border-stroke/50"
+              } rounded-md`}
+              rows={4}
+              cols={50}
+              onChange={(event) => {
+                setError({ ...error, feedbackError: "" });
+                setFeedback(event.target.value);
+              }}
+              value={feedback}
+            />
+            {error.feedbackError !== "" ? (
+              <p className="text-error text-sm font-medium">
+                {error.feedbackError}
+              </p>
+            ) : null}
+            {error.apiError && (
+              <ApiError
+                message={error.apiError}
+                setMessage={(value) =>
+                  setError((error) => ({
+                    ...error,
+                    apiError: value,
+                  }))
+                }
+              />
+            )}
+          </div>
+          <div className="flex flex-start items-center gap-4">
+            <Button
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
+              buttonText="Cancel"
+              onClick={() => {
+                setCurrentStep(COLLECT_RATING);
+              }}
+            />
+            <Button
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
+              buttonText="Continue"
+              onClick={() => {
+                if (feedback === "") {
+                  setError({
+                    ...error,
+                    feedbackError: "Response is required",
+                  });
+                  return;
+                }
+                setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
+              }}
+            />
+          </div>
+        </div>
         {error.apiError && (
           <ApiError
             message={error.apiError}
@@ -364,7 +445,7 @@ export default function CustomerFlowReviewForm({
             Please share as much information as you can.
           </p>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full lg:w-[50%]">
           <label
             htmlFor="negative-feedback"
             className="block text-sm text-heading mb-2 font-inter font-bold"
@@ -375,21 +456,19 @@ export default function CustomerFlowReviewForm({
             id="negative-feedback"
             name="negative-feedback"
             className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
-              error.negativeFeedbackError !== ""
-                ? "border-error"
-                : "border-stroke/50"
+              error.feedbackError !== "" ? "border-error" : "border-stroke/50"
             } rounded-md`}
             rows={4}
             cols={50}
             onChange={(event) => {
-              setError({ ...error, negativeFeedbackError: "" });
-              setNegativeFeedback(event.target.value);
+              setError({ ...error, feedbackError: "" });
+              setFeedback(event.target.value);
             }}
-            value={negativeFeedback}
+            value={feedback}
           />
-          {error.negativeFeedbackError !== "" ? (
+          {error.feedbackError !== "" ? (
             <p className="text-error text-sm font-medium">
-              {error.negativeFeedbackError}
+              {error.feedbackError}
             </p>
           ) : null}
           {error.apiError && (
@@ -416,10 +495,10 @@ export default function CustomerFlowReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
-              if (negativeFeedback === "") {
+              if (feedback === "") {
                 setError({
                   ...error,
-                  negativeFeedbackError: "Response is required",
+                  feedbackError: "Response is required",
                 });
                 return;
               }
