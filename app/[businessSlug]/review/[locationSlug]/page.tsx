@@ -2,11 +2,11 @@ import ReviewForm from "@/app/components/review-form";
 import React from "react";
 
 type Params = Promise<{
-  businessId: string;
-  locationId: string;
+  businessSlug: string;
+  locationSlug: string;
 }>;
 
 export default async function Review({ params }: { params: Params }) {
-  const { businessId, locationId } = await params;
-  return <ReviewForm businessId={businessId} locationId={locationId} />;
+  const { businessSlug, locationSlug } = await params;
+  return <ReviewForm businessSlug={businessSlug} locationSlug={locationSlug} />;
 }

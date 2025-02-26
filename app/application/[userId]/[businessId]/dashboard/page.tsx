@@ -15,17 +15,20 @@ import DeleteModal from "@/app/components/delete-modal";
 import ApiSuccess from "@/app/components/api-success";
 import UpdatePlatforms from "@/app/components/update-platform";
 import { PLATFORM_TYPES } from "@/app/components/update-platform/interface";
+import { useReviewsContext } from "@/context/reviewContext";
+import ReviewCharts from "@/app/components/review-charts/indev";
 
 export default function Dashboard() {
   const router = useRouter();
   const { user } = useUserContext();
   const { business } = useBusinessContext();
+  const { reviews } = useReviewsContext();
 
   const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [locations, setLocations] = useState<ILocation[]>([]);
+  const [privateReviews, setPrivateReviews] = useState(0);
   const [negativeReviews, setNegativeReviews] = useState(0);
-  const [fetchNegativeReviewsLoading, setFetchNegativeReviewsLoading] =
-    useState(true);
+  const [fetchReviewsLoading, setFetchReviewsLoading] = useState(true);
   const [downloadQrCodeLoading, setDownloadQrCodeLoading] = useState(false);
   const [deleteLocationLoading, setDeleteLocationLoading] = useState(false);
   const [successDeleteMessage, setSuccessDeleteMessage] = useState("");
@@ -51,12 +54,18 @@ export default function Dashboard() {
         `/api/business-reviews?businessId=${business._id}`
       );
       const { data } = response;
-      const filteredReviews = data.filter((review: any) => review.rating <= 3);
-      setNegativeReviews(filteredReviews.length);
+      const filteredPositiveReviews = data.filter(
+        (review: any) => review.rating >= 4 && review.feedback !== null
+      );
+      const filteredNegativeReviews = data.filter(
+        (review: any) => review.rating <= 3
+      );
+      setPrivateReviews(filteredPositiveReviews.length);
+      setNegativeReviews(filteredNegativeReviews.length);
     } catch (err: any) {
       setError((error) => ({ ...error, apiError: err.message }));
     } finally {
-      setFetchNegativeReviewsLoading(false);
+      setFetchReviewsLoading(false);
     }
   }, []);
 
@@ -109,7 +118,7 @@ export default function Dashboard() {
     setDownloadQrCodeLoading(true);
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -138,9 +147,9 @@ export default function Dashboard() {
 
     try {
       await navigator.share({
-        title: "Check out this review!",
-        text: "I found this review interesting. Take a look!",
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`,
+        title: "How Did We Do? Let Us Know!",
+        text: "Your feedback helps us improve. Please take a moment to let us know your thoughts",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review`,
       });
     } catch (err) {
       console.log("Error sharing:", err);
@@ -156,7 +165,7 @@ export default function Dashboard() {
     try {
       navigator.clipboard
         .writeText(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review`
         )
         .then(() => {
           setCopySuccess("Copied to clipboard!");
@@ -298,11 +307,11 @@ export default function Dashboard() {
               </p>
               <div className="py-4 flex items-center gap-4">
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review`}
                   target="_blank"
                   className="text-lg font-bold text-heading break-words underline"
                 >
-                  {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review`}
+                  {`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review`}
                 </Link>
                 <div className="relative mt-2">
                   <button
@@ -362,7 +371,7 @@ export default function Dashboard() {
                   }}
                 />
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/customer-flow`}
                   target="_blank"
                   className="px-8 py-3 rounded-md hover:shadow-buttonHover text-primary bg-white font-semibold"
                 >
@@ -370,6 +379,9 @@ export default function Dashboard() {
                 </Link>
                 <a className="hidden" ref={downloadQrCodeRef}></a>
               </div>
+            </div>
+            <div className="my-8">
+              <ReviewCharts reviews={reviews} businessId={business._id} />
             </div>
             <div className="bg-white py-4 mt-8">
               <div className="flex items-center gap-8">
@@ -391,9 +403,9 @@ export default function Dashboard() {
                   return (
                     <div
                       key={index}
-                      className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
+                      className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
                     >
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-2 pt-2">
                         <Image
                           src={`/${platform.id}.svg`}
                           alt={`Logo of ${platform.name}`}
@@ -401,7 +413,7 @@ export default function Dashboard() {
                           height={40}
                           priority
                         />
-                        <p className="text-sm leading-md text-heading text-center px-2">
+                        <p className="text-sm leading-md text-heading text-center px-2 pt-3">
                           {platform.name}
                         </p>
                       </div>
@@ -411,23 +423,43 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
-                <div className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
-                  <div className="flex flex-col items-center gap-2">
+                <div className="w-[0.5px] mx-4 rounded-full h-[160px] bg-stroke" />
+                <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                  <div className="flex flex-col items-center gap-2 pt-2">
                     <Image
-                      src={"/thumb-down.svg"}
-                      alt={"Thumb Down Svg"}
+                      src={"/negative-reviews.svg"}
+                      alt={"Negative Reviews Svg"}
                       width={40}
                       height={40}
                       priority
                     />
-                    <p className="text-sm leading-md text-heading text-center px-2">
+                    <p className="text-sm leading-md text-heading text-center px-2 pt-3">
                       Negative Reviews
                     </p>
                   </div>
                   <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                    {fetchNegativeReviewsLoading
+                    {fetchReviewsLoading
                       ? "Fetching..."
                       : `${negativeReviews} Reviews`}
+                  </p>
+                </div>
+                <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                  <div className="flex flex-col items-center gap-2 pt-2">
+                    <Image
+                      src={"/private-reviews.svg"}
+                      alt={"Private Reviews Svg"}
+                      width={40}
+                      height={40}
+                      priority
+                    />
+                    <p className="text-sm leading-md text-heading text-center px-2 pt-3">
+                      Private Reviews
+                    </p>
+                  </div>
+                  <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                    {fetchReviewsLoading
+                      ? "Fetching..."
+                      : `${privateReviews} Reviews`}
                   </p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import slugify from "slugify";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Business from "@/lib/models/business";
@@ -109,6 +110,18 @@ export const POST = async (request: Request) => {
       );
     }
 
+    // generate a unique slug for the employee name
+    let newSlug = slugify(name, { lower: true, strict: true });
+    let existingEmployeeWithSlugName = await Employee.find({ slug: newSlug });
+
+    while (existingEmployeeWithSlugName.length > 0) {
+      newSlug = `${slugify(name, {
+        lower: true,
+        strict: true,
+      })}-${existingEmployeeWithSlugName.length + 1}`;
+      existingEmployeeWithSlugName = await Employee.find({ slug: newSlug });
+    }
+
     // create a one time payment subscription here.
     const priceId: string = process.env.STRIPE_PRICE_ID_EMPLOYEE as string;
     const mode: any = PAYMENT_CONSTANTS.SUBSCRIPTION_MODE as string;
@@ -123,6 +136,7 @@ export const POST = async (request: Request) => {
           total_reviews: 0,
           business_id: new Types.ObjectId(business._id),
           location_id: new Types.ObjectId(location._id),
+          slug: newSlug,
         },
       }),
     };

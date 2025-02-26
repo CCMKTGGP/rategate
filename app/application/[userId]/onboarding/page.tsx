@@ -213,7 +213,6 @@ export default function Onboarding() {
             <Image
               src="/logo.png"
               alt="Logo of Rategate"
-              className="h-8"
               width={135}
               height={50}
               priority

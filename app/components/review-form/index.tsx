@@ -13,6 +13,7 @@ import {
   LANDING_PAGE,
   NEGATIVE_FEEDBACK_THANK_YOU,
   POSITIVE_FEEDBACK_THANK_YOU,
+  REVIEW_TYPES,
   SELECT_PLATFORM,
 } from "@/constants/review_steps";
 import Input from "../input";
@@ -22,13 +23,13 @@ import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
 
 export default function ReviewForm({
-  businessId,
-  locationId,
-  employeeId,
+  businessSlug,
+  locationSlug,
+  employeeSlug,
 }: {
-  businessId: string;
-  locationId?: string;
-  employeeId?: string;
+  businessSlug: string;
+  locationSlug?: string;
+  employeeSlug?: string;
 }) {
   const router = useRouter();
   const [review, setReview] = useState<any>();
@@ -44,7 +45,7 @@ export default function ReviewForm({
   const [fetchEmployeeDetailsLoading, setFetchEmployeeDetailsLoading] =
     useState(false);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
-  const [negativeFeedback, setNegativeFeedback] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [postReviewLoading, setPostReviewLoading] = useState(false);
   const [contactFormLoading, setContactFormLoading] = useState(false);
   const [_, setReviewSuccessMessage] = useState("");
@@ -58,7 +59,7 @@ export default function ReviewForm({
     firstNameError: "",
     lastNameError: "",
     emailError: "",
-    negativeFeedbackError: "",
+    feedbackError: "",
     apiError: "",
   });
   const [noBusinessError, setNoBusinessError] = useState(false);
@@ -69,7 +70,7 @@ export default function ReviewForm({
   useEffect(() => {
     async function getBusinessDetails() {
       try {
-        const response = await fetchData(`/api/business/${businessId}`);
+        const response = await fetchData(`/api/business-slug/${businessSlug}`);
         const { data } = response;
         setBusiness(data.business);
         setIsAllowedToReview(data.is_allowed_to_review);
@@ -80,16 +81,16 @@ export default function ReviewForm({
       }
     }
 
-    if (businessId) {
+    if (businessSlug) {
       getBusinessDetails();
     }
-  }, [businessId]);
+  }, [businessSlug]);
 
   useEffect(() => {
     async function getLocationDetails() {
       setFetchLocationDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/location/${locationId}`);
+        const response = await fetchData(`/api/location-slug/${locationSlug}`);
         const { data } = response;
         setLocation(data);
       } catch (err: any) {
@@ -99,16 +100,16 @@ export default function ReviewForm({
       }
     }
 
-    if (locationId) {
+    if (locationSlug) {
       getLocationDetails();
     }
-  }, [locationId]);
+  }, [locationSlug]);
 
   useEffect(() => {
     async function getEmployeeDetails() {
       setFetchEmployeeDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/employee/${employeeId}`);
+        const response = await fetchData(`/api/employee-slug/${employeeSlug}`);
         const { data } = response;
         setEmployee(data);
       } catch (err: any) {
@@ -118,10 +119,10 @@ export default function ReviewForm({
       }
     }
 
-    if (employeeId) {
+    if (employeeSlug) {
       getEmployeeDetails();
     }
-  }, [employeeId]);
+  }, [employeeSlug]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -193,7 +194,7 @@ export default function ReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationId) {
+    if (locationSlug) {
       return (
         location?.platforms?.filter((platform) => platform?.url !== "") || []
       );
@@ -219,7 +220,6 @@ export default function ReviewForm({
       <Image
         src="/logo.png"
         alt="Logo of Rategate"
-        className="h-8"
         width={135}
         height={50}
         priority
@@ -241,7 +241,7 @@ export default function ReviewForm({
         firstName,
         lastName,
         email,
-        businessId,
+        businessId: business?._id,
         reviewId: review._id,
       });
       setContactSuccessMessage("Thank you for your contact!");
@@ -256,7 +256,7 @@ export default function ReviewForm({
     }
   }
 
-  async function handlePostPositiveFeedback(platform: {
+  async function handlePostReviewOnPlatform(platform: {
     id: string;
     name: string;
     url: string;
@@ -266,9 +266,10 @@ export default function ReviewForm({
     try {
       const response = await postData(`/api/review`, {
         rating,
-        businessId,
-        locationId,
-        employeeId,
+        businessId: business?._id,
+        locationId: location?._id,
+        employeeId: employee?._id,
+        type: REVIEW_TYPES.POSITIVE,
         platform,
       });
       const { message } = response;
@@ -285,15 +286,40 @@ export default function ReviewForm({
     }
   }
 
+  async function handlePostPositiveFeedback() {
+    setPostReviewLoading(true);
+    try {
+      const response = await postData(`/api/review`, {
+        rating,
+        feedback: feedback,
+        type: REVIEW_TYPES.POSITIVE,
+        businessId: business?._id,
+        locationId: location?._id,
+        employeeId: employee?._id,
+      });
+      const { message } = response;
+      setReviewSuccessMessage(message);
+      setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
+    } catch (err: any) {
+      setError((error) => ({
+        ...error,
+        apiError: err.message,
+      }));
+    } finally {
+      setPostReviewLoading(false);
+    }
+  }
+
   async function handlePostNegativeFeedback() {
     setPostReviewLoading(true);
     try {
       const response = await postData(`/api/review`, {
         rating,
-        feedback: negativeFeedback,
-        businessId,
-        locationId,
-        employeeId,
+        feedback: feedback,
+        type: REVIEW_TYPES.NEGATIVE,
+        businessId: business?._id,
+        locationId: location?._id,
+        employeeId: employee?._id,
       });
       const { message, data } = response;
       setReview(data);
@@ -347,7 +373,14 @@ export default function ReviewForm({
           <div className="flex items-center gap-4">
             {Array.from({ length: 5 }, (_, index) => {
               return index < rating ? (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-filled.png"
                     alt="Filled rating image"
@@ -357,7 +390,14 @@ export default function ReviewForm({
                   />
                 </button>
               ) : (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-empty.png"
                     alt="Empty rating image"
@@ -408,7 +448,7 @@ export default function ReviewForm({
                 key={index}
                 type="button"
                 className="w-[150px] h-[150px] md:w-[200px] md:h-[200px] bg-white border border-stroke/20 rounded-[12px] shadow-card flex flex-col items-center justify-center gap-6"
-                onClick={() => handlePostPositiveFeedback(platform)}
+                onClick={() => handlePostReviewOnPlatform(platform)}
                 disabled={postReviewLoading}
               >
                 <Image
@@ -424,6 +464,73 @@ export default function ReviewForm({
               </button>
             );
           })}
+        </div>
+        <hr className="w-full lg:w-[50%]" />
+        <div className="flex flex-col gap-4 w-full lg:w-[50%]">
+          <div className="flex flex-col">
+            <label
+              htmlFor="positive-feedback"
+              className="block text-sm text-heading mb-2 font-inter font-bold"
+            >
+              Response
+            </label>
+            <textarea
+              id="positive-feedback"
+              name="positive-feedback"
+              className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
+                error.feedbackError !== "" ? "border-error" : "border-stroke/50"
+              } rounded-md`}
+              rows={4}
+              cols={50}
+              onChange={(event) => {
+                setError({ ...error, feedbackError: "" });
+                setFeedback(event.target.value);
+              }}
+              value={feedback}
+            />
+            {error.feedbackError !== "" ? (
+              <p className="text-error text-sm font-medium">
+                {error.feedbackError}
+              </p>
+            ) : null}
+            {error.apiError && (
+              <ApiError
+                message={error.apiError}
+                setMessage={(value) =>
+                  setError((error) => ({
+                    ...error,
+                    apiError: value,
+                  }))
+                }
+              />
+            )}
+          </div>
+          <div className="flex flex-start items-center gap-4">
+            <Button
+              isDisabled={postReviewLoading}
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
+              buttonText="Cancel"
+              onClick={() => {
+                setCurrentStep(COLLECT_RATING);
+              }}
+            />
+            <Button
+              isDisabled={postReviewLoading}
+              isLoading={postReviewLoading}
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
+              buttonText="Continue"
+              onClick={() => {
+                if (feedback === "") {
+                  setError({
+                    ...error,
+                    feedbackError: "Response is required",
+                  });
+                  return;
+                }
+                handlePostPositiveFeedback();
+              }}
+            />
+          </div>
         </div>
         {postReviewLoading && (
           <p className="text-base leading-6 text-subHeading">
@@ -467,21 +574,19 @@ export default function ReviewForm({
             id="negative-feedback"
             name="negative-feedback"
             className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
-              error.negativeFeedbackError !== ""
-                ? "border-error"
-                : "border-stroke/50"
+              error.feedbackError !== "" ? "border-error" : "border-stroke/50"
             } rounded-md`}
             rows={4}
             cols={50}
             onChange={(event) => {
-              setError({ ...error, negativeFeedbackError: "" });
-              setNegativeFeedback(event.target.value);
+              setError({ ...error, feedbackError: "" });
+              setFeedback(event.target.value);
             }}
-            value={negativeFeedback}
+            value={feedback}
           />
-          {error.negativeFeedbackError !== "" ? (
+          {error.feedbackError !== "" ? (
             <p className="text-error text-sm font-medium">
-              {error.negativeFeedbackError}
+              {error.feedbackError}
             </p>
           ) : null}
           {error.apiError && (
@@ -511,10 +616,10 @@ export default function ReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
-              if (negativeFeedback === "") {
+              if (feedback === "") {
                 setError({
                   ...error,
-                  negativeFeedbackError: "Response is required",
+                  feedbackError: "Response is required",
                 });
                 return;
               }

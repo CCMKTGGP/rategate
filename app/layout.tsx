@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { UserContext } from "@/context/userContext";
 import { BusinessContext } from "@/context/businessContext";
+import { ReviewsContext } from "@/context/reviewContext";
 
 export const metadata: Metadata = {
   title: "Rategate",
@@ -34,7 +35,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <UserContext>
-          <BusinessContext>{children}</BusinessContext>
+          <BusinessContext>
+            <ReviewsContext>{children}</ReviewsContext>
+          </BusinessContext>
         </UserContext>
       </body>
     </html>

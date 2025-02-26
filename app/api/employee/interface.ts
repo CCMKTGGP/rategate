@@ -5,4 +5,5 @@ export interface IEmployee {
   total_reviews?: number;
   business_id?: string;
   location_id?: string;
+  slug?: string;
 }

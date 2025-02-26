@@ -11,8 +11,15 @@ import Employee from "@/lib/models/employee";
 export const POST = async (request: Request) => {
   try {
     // extract the request body from request
-    const { rating, feedback, businessId, locationId, employeeId, platform } =
-      await request.json();
+    const {
+      rating,
+      feedback,
+      businessId,
+      locationId,
+      employeeId,
+      platform,
+      type,
+    } = await request.json();
 
     // check if the businessId exist and is valid
     if (!businessId || !Types.ObjectId.isValid(businessId)) {
@@ -73,6 +80,9 @@ export const POST = async (request: Request) => {
     // create the new review object
     const newReview = new Review({
       rating,
+      type,
+      provider:
+        platform && Object.keys(platform).length > 0 ? platform.name : null,
       feedback: feedback ? feedback : null,
       location_id: locationId ? new Types.ObjectId(locationId) : null,
       employee_id: employeeId ? new Types.ObjectId(employeeId) : null,

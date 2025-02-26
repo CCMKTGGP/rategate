@@ -29,9 +29,9 @@ export default function ViewLocationClient({
   const downloadQrCodeRef = useRef<HTMLAnchorElement | null>(null);
   const [state, setState] = useState<ILocation>({});
   const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [privateReviews, setPrivateReviews] = useState(0);
   const [negativeReviews, setNegativeReviews] = useState(0);
-  const [fetchNegativeReviewsLoading, setFetchNegativeReviewsLoading] =
-    useState(true);
+  const [fetchReviewsLoading, setFetchReviewsLoading] = useState(true);
   const [fetchEmployeesLoading, setFetchEmployeesLoading] = useState(false);
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
@@ -73,7 +73,7 @@ export default function ViewLocationClient({
   });
 
   // extract the state here.
-  const { _id, name, address, platforms } = state;
+  const { _id, name, address, platforms, slug: locationSlug } = state;
 
   // fetch location details in useEffect hook. This way, we only fetch when locationId changes.
   useEffect(() => {
@@ -120,12 +120,18 @@ export default function ViewLocationClient({
         `/api/location-reviews?locationId=${locationId}`
       );
       const { data } = response;
-      const filteredReviews = data.filter((review: any) => review.rating <= 3);
-      setNegativeReviews(filteredReviews.length);
+      const filteredPositiveReviews = data.filter(
+        (review: any) => review.rating >= 4 && review.feedback !== null
+      );
+      const filteredNegativeReviews = data.filter(
+        (review: any) => review.rating <= 3
+      );
+      setPrivateReviews(filteredPositiveReviews.length);
+      setNegativeReviews(filteredNegativeReviews.length);
     } catch (err: any) {
       setError((error) => ({ ...error, apiError: err.message }));
     } finally {
-      setFetchNegativeReviewsLoading(false);
+      setFetchReviewsLoading(false);
     }
   }, []);
 
@@ -178,7 +184,7 @@ export default function ViewLocationClient({
     setDownloadLocationQrCodeLoading(true);
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -204,7 +210,7 @@ export default function ViewLocationClient({
     }));
     try {
       const response = await postData("/api/generate-qr-code", {
-        data: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}/${employee._id}`,
+        data: `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}/${employee.slug}`,
       });
       const { data } = response;
       const ref: any = downloadQrCodeRef?.current;
@@ -237,9 +243,9 @@ export default function ViewLocationClient({
 
     try {
       await navigator.share({
-        title: `Check out this review for location ${name}!`,
-        text: "I found this review interesting. Take a look!",
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`,
+        title: `How Did We Do? Let Us Know!`,
+        text: "Your feedback helps us improve. Please take a moment to let us know your thoughts",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}`,
       });
     } catch (err) {
       console.log("Error sharing:", err);
@@ -251,7 +257,7 @@ export default function ViewLocationClient({
     try {
       navigator.clipboard
         .writeText(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}`
         )
         .then(() => {
           setCopySuccess("Copied to clipboard!");
@@ -453,11 +459,11 @@ export default function ViewLocationClient({
                 </p>
                 <div className="py-4 flex items-center gap-4">
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/review/${_id}`}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}`}
                     target="_blank"
                     className="text-lg font-bold text-heading break-words underline"
                   >
-                    {`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business.name}/review/${name}`}
+                    {`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/review/${locationSlug}`}
                   </Link>
                   <div className="relative mt-2">
                     <button
@@ -517,7 +523,7 @@ export default function ViewLocationClient({
                     }}
                   />
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${business._id}/customer-flow/${_id}`}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/${business.slug}/customer-flow/${locationSlug}`}
                     target="_blank"
                     className="px-8 py-3 rounded-md hover:shadow-buttonHover bg-white text-primary font-semibold"
                   >
@@ -546,9 +552,9 @@ export default function ViewLocationClient({
                     return (
                       <div
                         key={index}
-                        className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
+                        className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
                       >
-                        <div className="flex flex-col items-center gap-2">
+                        <div className="flex flex-col items-center gap-2 pt-2">
                           <Image
                             src={`/${platform.id}.svg`}
                             alt={`Logo of ${platform.name}`}
@@ -556,7 +562,7 @@ export default function ViewLocationClient({
                             height={40}
                             priority
                           />
-                          <p className="text-sm leading-md text-heading text-center px-2">
+                          <p className="text-sm leading-md text-heading text-center px-2 pt-3">
                             {platform.name}
                           </p>
                         </div>
@@ -566,23 +572,43 @@ export default function ViewLocationClient({
                       </div>
                     );
                   })}
-                  <div className="min-w-[140px] max-w-[150px] min-h-[120px] max-h-[160px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
-                    <div className="flex flex-col items-center gap-2">
+                  <div className="w-[0.5px] mx-4 rounded-full h-[160px] bg-stroke" />
+                  <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                    <div className="flex flex-col items-center gap-2 pt-2">
                       <Image
-                        src={"/thumb-down.svg"}
-                        alt={"Thumb Down Svg"}
+                        src={"/negative-reviews.svg"}
+                        alt={"Negative Reviews Svg"}
                         width={40}
                         height={40}
                         priority
                       />
-                      <p className="text-sm leading-md text-heading text-center px-2">
+                      <p className="text-sm leading-md text-heading text-center px-2 pt-3">
                         Negative Reviews
                       </p>
                     </div>
                     <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                      {fetchNegativeReviewsLoading
+                      {fetchReviewsLoading
                         ? "Fetching..."
                         : `${negativeReviews} Reviews`}
+                    </p>
+                  </div>
+                  <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                    <div className="flex flex-col items-center gap-2 pt-2">
+                      <Image
+                        src={"/private-reviews.svg"}
+                        alt={"Private Reviews Svg"}
+                        width={40}
+                        height={40}
+                        priority
+                      />
+                      <p className="text-sm leading-md text-heading text-center px-2 pt-3">
+                        Private Reviews
+                      </p>
+                    </div>
+                    <p className="text-base leading-md text-heading text-center px-2 font-bold">
+                      {fetchReviewsLoading
+                        ? "Fetching..."
+                        : `${privateReviews} Reviews`}
                     </p>
                   </div>
                 </div>
