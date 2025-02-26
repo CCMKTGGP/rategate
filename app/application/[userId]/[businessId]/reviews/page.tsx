@@ -10,6 +10,7 @@ import { REVIEW_TYPES } from "@/constants/review_steps";
 import ArrowDownSvg from "@/app/components/svg/ArrowDown";
 import ReviewCharts from "@/app/components/review-charts/indev";
 import { useReviewsContext } from "@/context/reviewContext";
+import Checkmark from "@/app/components/svg/Checkmark";
 
 export default function Reviews() {
   const ALL = "All";
@@ -80,19 +81,17 @@ export default function Reviews() {
                               <p
                                 className={`text-base leading-6 uppercase ${
                                   isSelected
-                                    ? "text-heading font-bold"
-                                    : "text-subHeading"
+                                    ? "text-primary font-bold"
+                                    : "text-heading"
                                 }`}
                               >
                                 {value}
                               </p>
                               {isSelected && (
-                                <Image
-                                  src="/check.svg"
-                                  alt="checkmark svg"
-                                  width={15}
-                                  height={8}
-                                  priority
+                                <Checkmark
+                                  width="20"
+                                  height="20"
+                                  fill="#636AE8"
                                 />
                               )}
                             </div>
