@@ -380,9 +380,11 @@ export default function Dashboard() {
                 <a className="hidden" ref={downloadQrCodeRef}></a>
               </div>
             </div>
-            <div className="my-8">
-              <ReviewCharts reviews={reviews} businessId={business._id} />
-            </div>
+            {reviews.length > 0 && (
+              <div className="my-8">
+                <ReviewCharts reviews={reviews} businessId={business._id} />
+              </div>
+            )}
             <div className="bg-white py-4 mt-8">
               <div className="flex items-center gap-8">
                 <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
