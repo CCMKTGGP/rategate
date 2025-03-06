@@ -53,7 +53,7 @@ export default function Onboarding() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl leading-[1.6] text-heading font-archivo font-bold max-w-[90%]">
-          {"Choose the platforms where you'd like to collect reviews."}
+          {"Choose the Platforms Where You Collect Reviews."}
         </h1>
         <p className="text-base leading-6 text-[#6E7787] w-[80%]">
           {
@@ -62,7 +62,7 @@ export default function Onboarding() {
         </p>
       </div>
       <div className="flex flex-col gap-4">
-        <form className="w-full lg:w-[500px]">
+        <div className="w-full lg:w-[500px]">
           {PLATFORMS.map(({ id, platformName, helperText, label }) => {
             //  add placeholder here
             const placeholder = getPlatformPlaceholder(id, business.name);
@@ -153,7 +153,7 @@ export default function Onboarding() {
               }}
             />
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
@@ -213,7 +213,6 @@ export default function Onboarding() {
             <Image
               src="/logo.png"
               alt="Logo of Rategate"
-              className="h-8"
               width={135}
               height={50}
               priority

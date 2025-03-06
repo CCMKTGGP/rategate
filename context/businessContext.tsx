@@ -17,6 +17,7 @@ export interface IBusiness {
     max_locations: number;
   };
   logo_url: string;
+  slug: string;
 }
 
 export const INITIAL_BUSINESS_STATE: IBusiness = {
@@ -32,6 +33,7 @@ export const INITIAL_BUSINESS_STATE: IBusiness = {
     max_locations: 0,
   },
   logo_url: "",
+  slug: "",
 };
 
 const Context = createContext<{

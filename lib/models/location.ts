@@ -10,6 +10,10 @@ const LocationSchema = new Schema(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+      unique: true,
+    },
     total_reviews: {
       type: Number,
       default: 0,

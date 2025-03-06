@@ -2,13 +2,16 @@ import CustomerFlowReviewForm from "@/app/components/customer-flow-review-form";
 import React from "react";
 
 type Params = Promise<{
-  businessId: string;
-  locationId: string;
+  businessSlug: string;
+  locationSlug: string;
 }>;
 
 export default async function Review({ params }: { params: Params }) {
-  const { businessId, locationId } = await params;
+  const { businessSlug, locationSlug } = await params;
   return (
-    <CustomerFlowReviewForm businessId={businessId} locationId={locationId} />
+    <CustomerFlowReviewForm
+      businessSlug={businessSlug}
+      locationSlug={locationSlug}
+    />
   );
 }

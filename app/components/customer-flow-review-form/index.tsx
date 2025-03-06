@@ -22,19 +22,18 @@ import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
 
 export default function CustomerFlowReviewForm({
-  businessId,
-  locationId,
-  employeeId,
+  businessSlug,
+  locationSlug,
+  employeeSlug,
 }: {
-  businessId: string;
-  locationId?: string;
-  employeeId?: string;
+  businessSlug: string;
+  locationSlug?: string;
+  employeeSlug?: string;
 }) {
   const router = useRouter();
   const [business, setBusiness] = useState<IBusiness>();
   const [location, setLocation] = useState<ILocation>();
   const [employee, setEmployee] = useState<IEmployee>();
-  const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
   const [fetchBusinessDetailsLoading, setFetchBusinessDetailsLoading] =
     useState(true);
@@ -43,7 +42,7 @@ export default function CustomerFlowReviewForm({
   const [fetchEmployeeDetailsLoading, setFetchEmployeeDetailsLoading] =
     useState(false);
   const [currentStep, setCurrentStep] = useState(LANDING_PAGE);
-  const [negativeFeedback, setNegativeFeedback] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [contactSuccessMessage, setContactSuccessMessage] = useState("");
   const [contactFormDetails, setContactFormDetails] = useState({
     firstName: "",
@@ -54,7 +53,7 @@ export default function CustomerFlowReviewForm({
     firstNameError: "",
     lastNameError: "",
     emailError: "",
-    negativeFeedbackError: "",
+    feedbackError: "",
     apiError: "",
   });
   const [noBusinessError, setNoBusinessError] = useState(false);
@@ -65,10 +64,9 @@ export default function CustomerFlowReviewForm({
   useEffect(() => {
     async function getBusinessDetails() {
       try {
-        const response = await fetchData(`/api/business/${businessId}`);
+        const response = await fetchData(`/api/business-slug/${businessSlug}`);
         const { data } = response;
         setBusiness(data.business);
-        setIsAllowedToReview(data.is_allowed_to_review);
       } catch (err: any) {
         setNoBusinessError(true);
       } finally {
@@ -76,16 +74,16 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (businessId) {
+    if (businessSlug) {
       getBusinessDetails();
     }
-  }, [businessId]);
+  }, [businessSlug]);
 
   useEffect(() => {
     async function getLocationDetails() {
       setFetchLocationDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/location/${locationId}`);
+        const response = await fetchData(`/api/location-slug/${locationSlug}`);
         const { data } = response;
         setLocation(data);
       } catch (err: any) {
@@ -95,16 +93,16 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (locationId) {
+    if (locationSlug) {
       getLocationDetails();
     }
-  }, [locationId]);
+  }, [locationSlug]);
 
   useEffect(() => {
     async function getEmployeeDetails() {
       setFetchEmployeeDetailsLoading(true);
       try {
-        const response = await fetchData(`/api/employee/${employeeId}`);
+        const response = await fetchData(`/api/employee-slug/${employeeSlug}`);
         const { data } = response;
         setEmployee(data);
       } catch (err: any) {
@@ -114,10 +112,10 @@ export default function CustomerFlowReviewForm({
       }
     }
 
-    if (employeeId) {
+    if (employeeSlug) {
       getEmployeeDetails();
     }
-  }, [employeeId]);
+  }, [employeeSlug]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -189,7 +187,7 @@ export default function CustomerFlowReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationId) {
+    if (locationSlug) {
       return (
         location?.platforms?.filter((platform) => platform?.url !== "") || []
       );
@@ -215,7 +213,6 @@ export default function CustomerFlowReviewForm({
       <Image
         src="/logo.png"
         alt="Logo of Rategate"
-        className="h-8"
         width={135}
         height={50}
         priority
@@ -235,7 +232,7 @@ export default function CustomerFlowReviewForm({
       </div>
       <div className="flex flex-start">
         <Button
-          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
           buttonText="Start Your Review"
           onClick={() => {
             setCurrentStep(COLLECT_RATING);
@@ -261,7 +258,14 @@ export default function CustomerFlowReviewForm({
           <div className="flex items-center gap-4">
             {Array.from({ length: 5 }, (_, index) => {
               return index < rating ? (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-filled.png"
                     alt="Filled rating image"
@@ -271,7 +275,14 @@ export default function CustomerFlowReviewForm({
                   />
                 </button>
               ) : (
-                <button key={index} onClick={() => setRating(index + 1)}>
+                <button
+                  key={index}
+                  onClick={() => {
+                    setFeedback("");
+                    setError({ ...error, feedbackError: "" });
+                    setRating(index + 1);
+                  }}
+                >
                   <Image
                     src="/rate-empty.png"
                     alt="Empty rating image"
@@ -287,7 +298,7 @@ export default function CustomerFlowReviewForm({
         <div className="flex flex-start">
           <Button
             isDisabled={rating <= 0}
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
               if (rating >= 4) {
@@ -341,6 +352,73 @@ export default function CustomerFlowReviewForm({
             );
           })}
         </div>
+        <hr className="w-full lg:w-[50%]" />
+        <div className="flex flex-col gap-4 w-full lg:w-[50%]">
+          <p className="text-2xl leading-8 text-heading font-archivo font-bold">
+            Share response privately
+          </p>
+          <div className="flex flex-col">
+            <label
+              htmlFor="positive-feedback"
+              className="block text-sm text-heading mb-2 font-inter font-bold"
+            >
+              Response
+            </label>
+            <textarea
+              id="positive-feedback"
+              name="positive-feedback"
+              className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
+                error.feedbackError !== "" ? "border-error" : "border-stroke/50"
+              } rounded-md`}
+              rows={4}
+              cols={50}
+              onChange={(event) => {
+                setError({ ...error, feedbackError: "" });
+                setFeedback(event.target.value);
+              }}
+              value={feedback}
+            />
+            {error.feedbackError !== "" ? (
+              <p className="text-error text-sm font-medium">
+                {error.feedbackError}
+              </p>
+            ) : null}
+            {error.apiError && (
+              <ApiError
+                message={error.apiError}
+                setMessage={(value) =>
+                  setError((error) => ({
+                    ...error,
+                    apiError: value,
+                  }))
+                }
+              />
+            )}
+          </div>
+          <div className="flex flex-start items-center gap-4">
+            <Button
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
+              buttonText="Cancel"
+              onClick={() => {
+                setCurrentStep(COLLECT_RATING);
+              }}
+            />
+            <Button
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
+              buttonText="Continue"
+              onClick={() => {
+                if (feedback === "") {
+                  setError({
+                    ...error,
+                    feedbackError: "Response is required",
+                  });
+                  return;
+                }
+                setCurrentStep(POSITIVE_FEEDBACK_THANK_YOU);
+              }}
+            />
+          </div>
+        </div>
         {error.apiError && (
           <ApiError
             message={error.apiError}
@@ -367,7 +445,7 @@ export default function CustomerFlowReviewForm({
             Please share as much information as you can.
           </p>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full lg:w-[50%]">
           <label
             htmlFor="negative-feedback"
             className="block text-sm text-heading mb-2 font-inter font-bold"
@@ -378,21 +456,19 @@ export default function CustomerFlowReviewForm({
             id="negative-feedback"
             name="negative-feedback"
             className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey bg-white ${
-              error.negativeFeedbackError !== ""
-                ? "border-error"
-                : "border-stroke/50"
+              error.feedbackError !== "" ? "border-error" : "border-stroke/50"
             } rounded-md`}
             rows={4}
             cols={50}
             onChange={(event) => {
-              setError({ ...error, negativeFeedbackError: "" });
-              setNegativeFeedback(event.target.value);
+              setError({ ...error, feedbackError: "" });
+              setFeedback(event.target.value);
             }}
-            value={negativeFeedback}
+            value={feedback}
           />
-          {error.negativeFeedbackError !== "" ? (
+          {error.feedbackError !== "" ? (
             <p className="text-error text-sm font-medium">
-              {error.negativeFeedbackError}
+              {error.feedbackError}
             </p>
           ) : null}
           {error.apiError && (
@@ -409,20 +485,20 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="Cancel"
             onClick={() => {
               setCurrentStep(COLLECT_RATING);
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Continue"
             onClick={() => {
-              if (negativeFeedback === "") {
+              if (feedback === "") {
                 setError({
                   ...error,
-                  negativeFeedbackError: "Response is required",
+                  feedbackError: "Response is required",
                 });
                 return;
               }
@@ -446,10 +522,10 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="End Review"
             onClick={() => {
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
         </div>
@@ -477,14 +553,14 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4 flex-wrap">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="End Review"
             onClick={() => {
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Add Contact Info"
             onClick={() => {
               setCurrentStep(COLLECT_CONTACT_INFO);
@@ -569,7 +645,7 @@ export default function CustomerFlowReviewForm({
         </div>
         <div className="flex flex-start items-center gap-4">
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="Form Reset"
             onClick={() => {
               setContactFormDetails({
@@ -580,7 +656,7 @@ export default function CustomerFlowReviewForm({
             }}
           />
           <Button
-            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+            buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="Submit"
             onClick={() => {
               const ALL_CHECKS_PASS = [
@@ -590,7 +666,7 @@ export default function CustomerFlowReviewForm({
               ].every(Boolean);
 
               if (!ALL_CHECKS_PASS) return;
-              router.push("/");
+              window.location.href = "https://rategate.cc";
             }}
           />
         </div>
@@ -626,36 +702,8 @@ export default function CustomerFlowReviewForm({
           </div>
           <div className="flex flex-start">
             <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
               buttonText="Register Now"
-              onClick={() => {
-                router.push("/");
-              }}
-            />
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!isAllowedToReview) {
-    return (
-      <main className="p-6 md:p-12 bg-background h-[100vh] overflow-auto">
-        <div className="py-4">{renderLogoOfBusiness()}</div>
-        <div className="py-6 flex flex-col gap-8">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
-              Maxed out free reviews!
-            </h2>
-            <p className="text-base leading-6 text-subHeading">
-              Your business has maxed out the free reviews on basic plan. Please
-              subscribe to a plan to get more reviews.
-            </p>
-          </div>
-          <div className="flex flex-start">
-            <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-              buttonText="Upgrade Now"
               onClick={() => {
                 router.push("/");
               }}
@@ -673,17 +721,16 @@ export default function CustomerFlowReviewForm({
         <div className="py-6 flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 text-heading font-archivo font-bold">
-              No Providers Registered for the business
+              Oops, there are no registered review platforms for this business.
             </h2>
             <p className="text-base leading-6 text-subHeading">
-              With the given url, there is no business registered in our
-              database. Follow this link to update the providers for your
-              account at Rategate.
+              {`The business you're reviewing hasn't completed setting up its
+              RateGate account. Please encourage them to complete their setup.`}
             </p>
           </div>
           <div className="flex flex-start">
             <Button
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
               buttonText="Update Now"
               onClick={() => {
                 router.push("/");
