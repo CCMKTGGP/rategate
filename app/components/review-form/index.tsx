@@ -457,6 +457,10 @@ export default function ReviewForm({
                   width={50}
                   height={50}
                   priority
+                  onError={(e: any) => {
+                    e.target.onerror = null;
+                    e.target.src = "/fallback.svg";
+                  }}
                 />
                 <p className="text-sm md:text-base leading-md text-heading">
                   {platform.name}

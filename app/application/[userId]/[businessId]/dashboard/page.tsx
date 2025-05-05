@@ -400,7 +400,7 @@ export default function Dashboard() {
                   Edit Platforms
                 </button>
               </div>
-              <div className="mt-4 flex items-center gap-4 overflow-auto">
+              <div className="mt-4 flex items-center gap-4 flex-wrap">
                 {business?.platforms.map((platform, index) => {
                   return (
                     <div
@@ -414,6 +414,10 @@ export default function Dashboard() {
                           width={40}
                           height={40}
                           priority
+                          onError={(e: any) => {
+                            e.target.onerror = null;
+                            e.target.src = "/fallback.svg";
+                          }}
                         />
                         <p className="text-sm leading-md text-heading text-center px-2 pt-3">
                           {platform.name}

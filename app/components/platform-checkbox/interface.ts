@@ -1,14 +1,12 @@
 export interface IPlatformCheckboxProps {
   url: string;
   platform: {
-    label: string;
     id: string;
     name: string;
-    helpertext: string;
   };
   placeholder: string;
-  checked: boolean;
   isLoading?: boolean;
-  onSelect: ({ id, name }: { id: string; name: string }) => void;
+  showSeparator?: boolean;
   onChange: ({ id, url }: { id: string; url: string }) => void;
+  onDelete: (id: string) => void;
 }
