@@ -650,6 +650,10 @@ export default function ReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="End Review"
             onClick={() => {
+              if (business?.review_redirect) {
+                window.location.href = business?.review_redirect;
+                return;
+              }
               window.location.href = "https://rategate.cc";
             }}
           />
@@ -681,6 +685,10 @@ export default function ReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="End Review"
             onClick={() => {
+              if (business?.review_redirect) {
+                window.location.href = business?.review_redirect;
+                return;
+              }
               window.location.href = "https://rategate.cc";
             }}
           />
