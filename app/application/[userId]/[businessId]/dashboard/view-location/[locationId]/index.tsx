@@ -317,13 +317,13 @@ export default function ViewLocationClient({
                 key={employee._id}
                 className="rounded-[12px] border border-stroke/60 group"
               >
-                <td className="text-base leading-6 w-[25%] text-left font-medium text-subHeading p-4">
+                <td className="text-base leading-6 w-[25%] text-left font-medium text-heading p-4">
                   {employee.name}
                 </td>
-                <td className="text-base leading-6 w-[30%] text-left font-medium text-subHeading p-4">
+                <td className="text-base leading-6 w-[30%] text-left font-medium text-heading p-4">
                   {employee.employee_id}
                 </td>
-                <td className="text-base leading-6 w-[15%] text-left font-medium text-subHeading p-4">
+                <td className="text-base leading-6 w-[15%] text-left font-medium text-heading p-4">
                   {employee.total_reviews}
                 </td>
                 <td className="w-[15%] text-left p-4">
@@ -343,7 +343,7 @@ export default function ViewLocationClient({
                     </button>
                   )}
                 </td>
-                <td className="text-base leading-6 w-[15%] text-left font-medium text-subHeading p-2">
+                <td className="text-base leading-6 w-[15%] text-left font-medium p-2">
                   <div className="hidden group-hover:block">
                     <div className="flex items-center gap-2">
                       <button
@@ -547,36 +547,53 @@ export default function ViewLocationClient({
                     Edit Platforms
                   </button>
                 </div>
+                <table className="mt-4 table">
+                  <thead>
+                    <tr className="rounded-[12px] border border-stroke/60">
+                      <th className="text-sm leading-4 w-[20%] text-left font-medium text-subHeading p-4">
+                        Platform Name
+                      </th>
+                      <th className="text-sm leading-4 w-[20%] text-left font-medium text-subHeading p-4">
+                        Platform Url
+                      </th>
+                      <th className="text-sm leading-4 w-[20%] text-left font-medium text-subHeading p-4">
+                        Total Reviews
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {platforms
+                      ?.sort((a, b) => a.name.localeCompare(b.name))
+                      ?.map((platform, index) => {
+                        return (
+                          <tr
+                            key={index}
+                            className="rounded-[12px] border border-stroke/60 group"
+                          >
+                            <td className="text-base leading-6 w-[20%] text-left font-medium text-heading p-4">
+                              {platform.name}
+                            </td>
+                            <td className="text-base leading-6 w-[20%] text-left font-medium text-heading p-4 underline">
+                              <Link href={platform.url} target="_blank">
+                                {platform.name} Link
+                              </Link>
+                            </td>
+                            <td className="text-base leading-6 w-[20%] text-left font-medium text-heading p-4">
+                              {platform.total_reviews}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="bg-white py-4 mt-8">
+                <div className="flex items-center gap-8">
+                  <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">
+                    Private Reviews
+                  </h3>
+                </div>
                 <div className="mt-4 flex items-center gap-4 flex-wrap">
-                  {platforms?.map((platform, index) => {
-                    return (
-                      <div
-                        key={index}
-                        className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4"
-                      >
-                        <div className="flex flex-col items-center gap-2 pt-2">
-                          <Image
-                            src={`/${platform.id}.svg`}
-                            alt={`Logo of ${platform.name}`}
-                            width={40}
-                            height={40}
-                            priority
-                            onError={(e: any) => {
-                              e.target.onerror = null;
-                              e.target.src = "/fallback.svg";
-                            }}
-                          />
-                          <p className="text-sm leading-md text-heading text-center px-2 pt-3">
-                            {platform.name}
-                          </p>
-                        </div>
-                        <p className="text-base leading-md text-heading text-center px-2 font-bold">
-                          {platform.total_reviews} Reviews
-                        </p>
-                      </div>
-                    );
-                  })}
-                  <div className="w-[0.5px] mx-4 rounded-full h-[160px] bg-stroke" />
                   <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
                     <div className="flex flex-col items-center gap-2 pt-2">
                       <Image
@@ -606,7 +623,7 @@ export default function ViewLocationClient({
                         priority
                       />
                       <p className="text-sm leading-md text-heading text-center px-2 pt-3">
-                        Private Reviews
+                        Positive Reviews
                       </p>
                     </div>
                     <p className="text-base leading-md text-heading text-center px-2 font-bold">

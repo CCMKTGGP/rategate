@@ -39,7 +39,7 @@ export default function UpdatePlatforms({
       searchError: "",
     }));
     const newPlatform: IPlatform = {
-      id: name.toUpperCase(),
+      id: name.toUpperCase().replace(/\s+/g, "_"),
       name,
       total_reviews: 0,
       url: "",

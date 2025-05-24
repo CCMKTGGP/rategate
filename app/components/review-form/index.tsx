@@ -194,13 +194,13 @@ export default function ReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationSlug) {
-      return (
-        location?.platforms?.filter((platform) => platform?.url !== "") || []
-      );
-    }
+    const platforms =
+      locationSlug && location ? location.platforms : business?.platforms;
+
     return (
-      business?.platforms?.filter((platform) => platform?.url !== "") || []
+      platforms
+        ?.filter((platform) => platform?.url !== "")
+        .sort((a, b) => a.name.localeCompare(b.name)) || []
     );
   }
 

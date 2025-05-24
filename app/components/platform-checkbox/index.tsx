@@ -26,6 +26,7 @@ export default function PlatformCheckbox({
           <p className="text-base text-heading pb-2 font-bold">{name}</p>
           <div className="ml-auto">
             <button
+              type="button"
               className="w-8 h-8 rounded-full flex items-center justify-center bg-error"
               onClick={() => onDelete(id)}
             >
@@ -42,12 +43,14 @@ export default function PlatformCheckbox({
           value={url}
           placeholder={placeholder}
           helpertext={`Enter your ${name} page url here`}
-          onChange={(event) =>
+          onChange={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             onChange({
               id,
               url: event.target.value,
-            })
-          }
+            });
+          }}
           disabled={isLoading}
         />
       </div>
