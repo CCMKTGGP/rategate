@@ -179,6 +179,14 @@ export default function Login() {
                   error={error.passwordError}
                   disabled={isLoading}
                 />
+                <div className="flex justify-end mb-8">
+                  <Link
+                    href={"/forgot-password"}
+                    className="font-bold text-primary hover:text-primaryHover underline px-1"
+                  >
+                    Forgot Password
+                  </Link>
+                </div>
                 {error.apiError && (
                   <ApiError
                     message={error.apiError}

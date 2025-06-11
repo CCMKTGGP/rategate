@@ -16,6 +16,8 @@ export interface IUser {
   verify_token?: string;
   verify_token_expire?: Date;
   number_of_retries?: number;
+  reset_password_token?: string;
+  reset_password_expire?: Date;
 }
 
 export const INITIAL_USER_STATE: IUser = {
