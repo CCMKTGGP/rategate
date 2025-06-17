@@ -4,8 +4,8 @@ import connect from "@/lib/db";
 import jwt from "jsonwebtoken";
 import User from "@/lib/models/user";
 import { NextResponse } from "next/server";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { cookies } from "next/headers";
+import authOptions from "@/lib/auth";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
