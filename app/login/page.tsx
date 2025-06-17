@@ -9,10 +9,12 @@ import ApiError from "../components/api-error";
 import Button from "../components/button";
 import { postData } from "@/utils/fetch";
 import {
+  COLLECT_BUSINESS_NAME,
   COLLECT_SURVEY,
   SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 export default function Login() {
   const router = useRouter();
@@ -89,6 +91,14 @@ export default function Login() {
       if (!data?.is_verified) {
         return router.push(`/email-not-verified`);
       }
+      if (
+        !data?.business_id ||
+        data.current_onboarding_step === COLLECT_BUSINESS_NAME
+      ) {
+        return router.push(
+          `/application/${data._id}/collect-business-name?email=${data.email}`
+        );
+      }
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("businessId", data.business_id);
@@ -120,7 +130,7 @@ export default function Login() {
   }
   return (
     <main className="flex items-center bg-background">
-      <div className="bg-white h-[100vh] w-full lg:w-[50%]">
+      <div className="bg-white h-[100vh] w-full lg:w-[50%] overflow-auto">
         <div className="py-8 px-6">
           <Image
             src="/logo.png"
@@ -160,6 +170,19 @@ export default function Login() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
+              <Button
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto my-6"
+                buttonText="Log In with Google"
+                onClick={() =>
+                  signIn("google", {
+                    redirect: true,
+                    callbackUrl: `/auth/redirect`,
+                  })
+                }
+              />
+              <hr />
               <form className="pt-4">
                 <Input
                   type="email"

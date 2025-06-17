@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Input from "../components/input";
 import Button from "../components/button";
 import ApiError from "../components/api-error";
@@ -9,6 +9,7 @@ import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
 import Image from "next/image";
 import { useBusinessContext } from "@/context/businessContext";
+import { signIn } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
@@ -221,6 +222,19 @@ export default function Register() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
+              <Button
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto my-6"
+                buttonText="Sign up with Google"
+                onClick={() =>
+                  signIn("google", {
+                    redirect: true,
+                    callbackUrl: `/auth/redirect`,
+                  })
+                }
+              />
+              <hr />
               <form className="pt-4">
                 <Input
                   type="text"
