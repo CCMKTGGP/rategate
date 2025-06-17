@@ -17,6 +17,11 @@ import Image from "next/image";
 import { signIn } from "next-auth/react";
 
 export default function Login() {
+  console.log("GOOGLE_CLIENT_ID", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!);
+  console.log(
+    "GOOGLE_CLIENT_SECRET",
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET!
+  );
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
