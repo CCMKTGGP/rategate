@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Input from "../components/input";
 import Button from "../components/button";
 import ApiError from "../components/api-error";
-import { postData } from "@/utils/fetch";
+import { fetchData, postData } from "@/utils/fetch";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import { signIn } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
+  const linkRef = useRef<any>();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -180,6 +181,17 @@ export default function Register() {
     }
   }
 
+  async function handleMicrosoftLogin() {
+    try {
+      const response = await fetchData("/api/login-with-microsoft");
+      const { data } = response;
+      linkRef.current.href = data;
+      linkRef.current.click();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <main className="flex items-center bg-background">
       <div className="bg-white h-[100vh] w-full lg:w-[50%] overflow-auto">
@@ -222,18 +234,28 @@ export default function Register() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <Button
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto my-6"
-                buttonText="Sign up with Google"
-                onClick={() =>
-                  signIn("google", {
-                    redirect: true,
-                    callbackUrl: `/auth/redirect`,
-                  })
-                }
-              />
+              <div className="flex flex-col gap-4 my-4">
+                <Button
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto"
+                  buttonText="Sign up with Google"
+                  onClick={() =>
+                    signIn("google", {
+                      redirect: true,
+                      callbackUrl: `/auth/redirect`,
+                    })
+                  }
+                />
+                <Button
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto"
+                  buttonText="Sign up with Microsoft"
+                  onClick={() => handleMicrosoftLogin()}
+                />
+                <a ref={linkRef} className="hidden"></a>
+              </div>
               <hr />
               <form className="pt-4">
                 <Input

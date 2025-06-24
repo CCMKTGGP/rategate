@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { fetchData } from "@/utils/fetch";
 import { useUserContext } from "@/context/userContext";
 
-export default function RedirectPage() {
-  const { status } = useSession();
+export default function MicrosoftRedirectPage() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
   const router = useRouter();
   const { setUser } = useUserContext();
 
   useEffect(() => {
-    if (status === "loading") return;
-
     const redirectUser = async () => {
       try {
-        const response = await fetchData("/api/current-user");
+        const response = await fetchData(
+          "/api/current-microsoft-user?email=" + email
+        );
         const { data } = response;
         try {
           if (typeof window !== "undefined") {
@@ -50,7 +50,7 @@ export default function RedirectPage() {
     };
 
     redirectUser();
-  }, [status, router]);
+  }, [router]);
 
   return (
     <div className="h-[100vh] w-[100vw] flex items-center justify-center">
