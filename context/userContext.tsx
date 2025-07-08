@@ -1,5 +1,6 @@
 "use client";
 import {
+  COLLECT_BUSINESS_NAME,
   COLLECT_SURVEY,
   SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
@@ -16,6 +17,9 @@ export interface IUser {
   verify_token?: string;
   verify_token_expire?: Date;
   number_of_retries?: number;
+  reset_password_token?: string;
+  reset_password_expire?: Date;
+  business_id?: string;
 }
 
 export const INITIAL_USER_STATE: IUser = {
@@ -58,6 +62,14 @@ export function UserContext({ children }: { children: React.ReactNode }) {
         setUser(data);
         if (!data?.is_verified && !authPathNames.includes(pathname)) {
           router.push("/email-not-verified");
+        }
+        if (
+          !data?.business_id ||
+          data.current_onboarding_step === COLLECT_BUSINESS_NAME
+        ) {
+          return router.push(
+            `/application/${data._id}/collect-business-name?email=${data.email}`
+          );
         }
         if (
           data.current_onboarding_step === SELECT_PLATFORMS &&

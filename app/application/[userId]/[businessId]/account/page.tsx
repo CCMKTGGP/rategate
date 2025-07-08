@@ -17,6 +17,9 @@ export default function Account() {
   const [name, setName] = useState(business.name);
   const [email, setEmail] = useState(business.email);
   const [phoneNumber, setPhoneNumber] = useState(business.phone_number);
+  const [reviewRedirectUrl, setReviewRedirectUrl] = useState(
+    business.review_redirect || ""
+  );
   const [successMessage, setSuccessMessage] = useState("");
   const [file, setFile] = useState<any>();
   const [fileName, setFileName] = useState("No file chosen");
@@ -24,9 +27,15 @@ export default function Account() {
     nameError: "",
     emailError: "",
     phoneNumberError: "",
+    reviewRedirectUrlError: "",
     fileNameError: "",
     apiError: "",
   });
+
+  function isValidURL(url: string) {
+    const urlRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i;
+    return urlRegex.test(url);
+  }
 
   function checkName() {
     if (!name) {
@@ -43,6 +52,24 @@ export default function Account() {
     return true;
   }
 
+  function checkReviewRedirectUrl() {
+    if (reviewRedirectUrl) {
+      if (!isValidURL(reviewRedirectUrl)) {
+        setError((error) => ({
+          ...error,
+          reviewRedirectUrlError: "Invalid URL format",
+        }));
+        return false;
+      }
+      setError((error) => ({
+        ...error,
+        reviewRedirectUrlError: "",
+      }));
+      return true;
+    }
+    return true;
+  }
+
   function handleFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -54,12 +81,17 @@ export default function Account() {
   }
 
   async function handleUpdateBusiness() {
+    const ALL_CHECKS_PASS = [checkName(), checkReviewRedirectUrl()].every(
+      Boolean
+    );
+    if (!ALL_CHECKS_PASS) return;
     setIsLoading(true);
     try {
       const response = await putData(`/api/business/${business._id}`, {
         data: {
           name,
           phone_number: phoneNumber,
+          review_redirect: reviewRedirectUrl,
         },
       });
       const { message, data } = response;
@@ -165,6 +197,18 @@ export default function Account() {
                     error={error.phoneNumberError}
                     disabled={isLoading}
                   />
+                  <Input
+                    type="text"
+                    label="Review Redirect URL"
+                    value={reviewRedirectUrl}
+                    placeholder="Enter your review redirect URL"
+                    onChange={(event) =>
+                      setReviewRedirectUrl(event.target.value)
+                    }
+                    onBlur={checkReviewRedirectUrl}
+                    error={error.reviewRedirectUrlError}
+                    disabled={isLoading}
+                  />
                   {error.apiError && (
                     <ApiError
                       message={error.apiError}
@@ -185,6 +229,7 @@ export default function Account() {
                         setName(business.name);
                         setEmail(business.email);
                         setPhoneNumber(business.phone_number);
+                        setReviewRedirectUrl(business.review_redirect);
                       }}
                     />
                     <Button

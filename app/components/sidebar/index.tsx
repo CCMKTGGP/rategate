@@ -16,6 +16,7 @@ import ApiError from "../api-error";
 import Button from "../button";
 import ArrowDownSvg from "../svg/ArrowDown";
 import ReviewSvg from "../svg/Review";
+import TrendsSvg from "../svg/Trends";
 
 export default function Sidebar() {
   const router = useRouter();
@@ -30,12 +31,20 @@ export default function Sidebar() {
   });
 
   // CONSTANTS
-  const SIDEBAR_ITEMS = ["Dashboard", "Reviews", "Billing", "Account"];
+  const SIDEBAR_ITEMS = [
+    "Dashboard",
+    "Trends",
+    "Reviews",
+    "Billing",
+    "Account",
+  ];
 
   const fetchIcon = (itemName: string, isActive: boolean) => {
     switch (itemName.toLowerCase()) {
       case "dashboard":
         return <DashboardSvg fill={isActive ? "#636AE8" : "#9095A0"} />;
+      case "trends":
+        return <TrendsSvg fill={isActive ? "#636AE8" : "#9095A0"} />;
       case "account":
         return <AccountSvg fill={isActive ? "#636AE8" : "#9095A0"} />;
       case "reviews":

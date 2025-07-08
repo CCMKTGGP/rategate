@@ -37,6 +37,10 @@ const BusinessSchema = new Schema(
       type: String,
       default: null,
     },
+    review_redirect: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

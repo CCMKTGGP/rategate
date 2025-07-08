@@ -4,6 +4,7 @@ import "./globals.css";
 import { UserContext } from "@/context/userContext";
 import { BusinessContext } from "@/context/businessContext";
 import { ReviewsContext } from "@/context/reviewContext";
+import CustomSessionProvider from "./components/session-provider";
 
 export const metadata: Metadata = {
   title: "Rategate",
@@ -34,11 +35,13 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="antialiased">
-        <UserContext>
-          <BusinessContext>
-            <ReviewsContext>{children}</ReviewsContext>
-          </BusinessContext>
-        </UserContext>
+        <CustomSessionProvider>
+          <UserContext>
+            <BusinessContext>
+              <ReviewsContext>{children}</ReviewsContext>
+            </BusinessContext>
+          </UserContext>
+        </CustomSessionProvider>
       </body>
     </html>
   );

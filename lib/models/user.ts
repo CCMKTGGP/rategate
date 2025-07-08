@@ -31,6 +31,12 @@ const UserSchema = new Schema(
     verify_token_expire: {
       type: Date,
     },
+    reset_password_token: {
+      type: String,
+    },
+    reset_password_expire: {
+      type: Date,
+    },
     current_onboarding_step: {
       type: String,
       default: null,

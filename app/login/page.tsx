@@ -3,19 +3,22 @@
 import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Input from "../components/input";
 import ApiError from "../components/api-error";
 import Button from "../components/button";
-import { postData } from "@/utils/fetch";
+import { fetchData, postData } from "@/utils/fetch";
 import {
+  COLLECT_BUSINESS_NAME,
   COLLECT_SURVEY,
   SELECT_PLATFORMS,
 } from "@/constants/onboarding-constants";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 export default function Login() {
   const router = useRouter();
+  const linkRef = useRef<any>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState({
@@ -89,6 +92,14 @@ export default function Login() {
       if (!data?.is_verified) {
         return router.push(`/email-not-verified`);
       }
+      if (
+        !data?.business_id ||
+        data.current_onboarding_step === COLLECT_BUSINESS_NAME
+      ) {
+        return router.push(
+          `/application/${data._id}/collect-business-name?email=${data.email}`
+        );
+      }
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("businessId", data.business_id);
@@ -118,9 +129,21 @@ export default function Login() {
       setIsLoading(false);
     }
   }
+
+  async function handleMicrosoftLogin() {
+    try {
+      const response = await fetchData("/api/login-with-microsoft");
+      const { data } = response;
+      linkRef.current.href = data;
+      linkRef.current.click();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <main className="flex items-center bg-background">
-      <div className="bg-white h-[100vh] w-full lg:w-[50%]">
+      <div className="bg-white h-[100vh] w-full lg:w-[50%] overflow-auto">
         <div className="py-8 px-6">
           <Image
             src="/logo.png"
@@ -160,6 +183,29 @@ export default function Login() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 my-4">
+                <Button
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto"
+                  buttonText="Log In with Google"
+                  onClick={() =>
+                    signIn("google", {
+                      redirect: true,
+                      callbackUrl: `/auth/redirect`,
+                    })
+                  }
+                />
+                <Button
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-transparent border border-primary hover:border-primaryHover text-primary hover:text-primaryHover font-semibold w-full justify-center mx-auto"
+                  buttonText="Log In with Microsoft"
+                  onClick={() => handleMicrosoftLogin()}
+                />
+                <a ref={linkRef} className="hidden"></a>
+              </div>
+              <hr />
               <form className="pt-4">
                 <Input
                   type="email"
@@ -179,6 +225,14 @@ export default function Login() {
                   error={error.passwordError}
                   disabled={isLoading}
                 />
+                <div className="flex justify-end mb-8">
+                  <Link
+                    href={"/forgot-password"}
+                    className="font-bold text-primary hover:text-primaryHover underline px-1"
+                  >
+                    Forgot Password
+                  </Link>
+                </div>
                 {error.apiError && (
                   <ApiError
                     message={error.apiError}

@@ -194,13 +194,13 @@ export default function ReviewForm({
   }
 
   function getPlatformsBasedOnId() {
-    if (locationSlug) {
-      return (
-        location?.platforms?.filter((platform) => platform?.url !== "") || []
-      );
-    }
+    const platforms =
+      locationSlug && location ? location.platforms : business?.platforms;
+
     return (
-      business?.platforms?.filter((platform) => platform?.url !== "") || []
+      platforms
+        ?.filter((platform) => platform?.url !== "")
+        .sort((a, b) => a.name.localeCompare(b.name)) || []
     );
   }
 
@@ -457,6 +457,10 @@ export default function ReviewForm({
                   width={50}
                   height={50}
                   priority
+                  onError={(e: any) => {
+                    e.target.onerror = null;
+                    e.target.src = "/fallback.svg";
+                  }}
                 />
                 <p className="text-sm md:text-base leading-md text-heading">
                   {platform.name}
@@ -646,6 +650,10 @@ export default function ReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#0a8d46] text-white"
             buttonText="End Review"
             onClick={() => {
+              if (business?.review_redirect) {
+                window.location.href = business?.review_redirect;
+                return;
+              }
               window.location.href = "https://rategate.cc";
             }}
           />
@@ -677,6 +685,10 @@ export default function ReviewForm({
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#a4a4a4] text-[#ffffff]"
             buttonText="End Review"
             onClick={() => {
+              if (business?.review_redirect) {
+                window.location.href = business?.review_redirect;
+                return;
+              }
               window.location.href = "https://rategate.cc";
             }}
           />

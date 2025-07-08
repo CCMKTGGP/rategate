@@ -6,10 +6,7 @@ import Input from "@/app/components/input";
 import PlatformCheckbox from "@/app/components/platform-checkbox";
 import Sidebar from "@/app/components/sidebar";
 import TopBar from "@/app/components/topbar";
-import {
-  getPlatformPlaceholder,
-  PLATFORMS,
-} from "@/constants/onboarding_platforms";
+import { SUPPORTED_PLATFORMS } from "@/constants/onboarding_platforms";
 import { useBusinessContext } from "@/context/businessContext";
 import { useUserContext } from "@/context/userContext";
 import { postData } from "@/utils/fetch";
@@ -35,7 +32,10 @@ export default function AddLocation() {
     addressError: "",
     urlError: "",
     apiError: "",
+    searchError: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [togglePlatformOptions, setTogglePlatformOptions] = useState(false);
 
   function checkLocationName() {
     if (!name) {
@@ -70,6 +70,42 @@ export default function AddLocation() {
   function isValidURL(url: string) {
     const urlRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(\/[^\s]*)?$/i;
     return urlRegex.test(url);
+  }
+
+  const handleAddPlatform = (name: string) => {
+    setError((error) => ({
+      ...error,
+      searchError: "",
+    }));
+    const newPlatform: IPlatform = {
+      id: name.toUpperCase().replace(/\s+/g, "_"),
+      name,
+      total_reviews: 0,
+      url: "",
+    };
+
+    // check if the platform is already added
+    if (
+      platforms.filter((p) => p.name.toLowerCase() === name.toLowerCase())
+        .length > 0
+    ) {
+      setError((error) => ({
+        ...error,
+        searchError: "Platform Already Added!",
+      }));
+      setSearchTerm("");
+      return;
+    }
+
+    // if not then update the platform state
+    setPlatforms([...platforms, newPlatform]);
+    setSearchTerm("");
+  };
+
+  function availablePlatforms() {
+    return SUPPORTED_PLATFORMS.filter((platformName: string) => {
+      return platformName.toLowerCase().includes(searchTerm.toLowerCase());
+    });
   }
 
   async function handleAddLocation() {
@@ -160,7 +196,7 @@ export default function AddLocation() {
             isDisabled={isLoading}
             isLoading={isLoading}
             buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-            buttonText="Add Location"
+            buttonText="Continue"
             onClick={() => {
               const ALL_CHECKS_PASS = [
                 checkLocationName(),
@@ -177,56 +213,85 @@ export default function AddLocation() {
 
   const SELECT_PLATFORMS_COMPONENT = (
     <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30 flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        <p className="text-base leading-6 text-heading w-[80%]">
-          {`Choose the platforms where you'd like to collect reviews for this location - ${name}.`}
-        </p>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-2xl leading-[1.2] text-heading font-archivo font-bold">
+          Search the Platforms Where You Collect Reviews.
+        </h3>
+        <p className="text-base leading-6 text-[#6E7787]">{`location - ${name}.`}</p>
       </div>
-      <div className="flex flex-col gap-4">
-        <div className="w-[500px]">
-          {PLATFORMS.map(({ id, platformName, helperText, label }) => {
-            const placeholder = getPlatformPlaceholder(id, business.name);
-            const selectedPlatform = platforms.filter(
-              (platform) => platform.id.toLowerCase() === id.toLowerCase()
-            );
-            const checked = selectedPlatform.length > 0;
+      <div className="relative w-full">
+        <Input
+          type="text"
+          label="Platform Name"
+          value={searchTerm}
+          autoComplete="off"
+          placeholder="type platforms name..."
+          onChange={(event) => setSearchTerm(event.target.value)}
+          onFocus={() => setTogglePlatformOptions(true)}
+          onBlur={() => setTimeout(() => setTogglePlatformOptions(false), 50)}
+          disabled={isLoading}
+        />
+
+        {error.searchError && (
+          <ApiError
+            message={error.searchError}
+            setMessage={(value) =>
+              setError((prev) => ({ ...prev, searchError: value }))
+            }
+          />
+        )}
+
+        {(togglePlatformOptions || searchTerm !== "") && (
+          <div className="p-4 w-full rounded-[12px] border border-stroke/60 bg-white absolute top-[90px] max-h-48 overflow-auto">
+            {availablePlatforms().length > 0 ? (
+              availablePlatforms().map((platformName, index) => {
+                return (
+                  <div
+                    key={platformName}
+                    className="cursor-pointer"
+                    onMouseDown={() => handleAddPlatform(platformName)}
+                  >
+                    <p className="text-base leading-6 text-subHeading p-2 hover:bg-primary hover:text-white hover:font-semibold transition-all rounded-[6px]">
+                      {platformName}
+                    </p>
+                    {index !== availablePlatforms().length - 1 && <hr />}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-base leading-6 text-subHeading">
+                Sorry, there are currently no platforms for that search string.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+      {platforms?.length > 0 ? (
+        <div className="flex flex-col max-w-[600px] max-h-96 overflow-auto">
+          {[...platforms].reverse().map(({ id, name: platformName, url }) => {
+            const placeholder = `https://${platformName}.com/v/${business.name}/reviews`;
             return (
               <div key={id}>
                 <PlatformCheckbox
+                  showSeparator={false}
                   placeholder={placeholder}
-                  url={selectedPlatform[0]?.url}
+                  url={url}
                   platform={{
                     id,
                     name: platformName,
-                    helpertext: helperText,
-                    label,
-                  }}
-                  checked={checked}
-                  onSelect={({ id, name }) => {
-                    let updatedPlatforms = platforms;
-                    if (selectedPlatform.length > 0) {
-                      updatedPlatforms = platforms.filter(
-                        (platform) =>
-                          platform.id.toLowerCase() !== id.toLowerCase()
-                      );
-                    } else {
-                      updatedPlatforms = [
-                        ...updatedPlatforms,
-                        {
-                          id,
-                          name,
-                          url: "",
-                          total_reviews: 0,
-                        },
-                      ];
-                    }
-                    setPlatforms(updatedPlatforms);
                   }}
                   onChange={({ id, url }) => {
                     const updatedPlatforms = platforms.map((platform) =>
                       platform.id.toLowerCase() === id.toLowerCase()
                         ? { ...platform, url }
                         : platform
+                    );
+                    setPlatforms(updatedPlatforms);
+                  }}
+                  onDelete={(id) => {
+                    const updatedPlatforms = platforms.filter(
+                      (platform) =>
+                        platform.id.toLowerCase() !== id.toLowerCase()
                     );
                     setPlatforms(updatedPlatforms);
                   }}
@@ -256,25 +321,29 @@ export default function AddLocation() {
               }
             />
           )}
-          <div className="flex justify-between mt-12 mb-6">
-            <Button
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
-              buttonText="Back"
-              onClick={() => {
-                setCurrentStep(COLLECT_LOCATION_INFO);
-              }}
-            />
-            <Button
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-              buttonText="Continue"
-              onClick={() => handleAddLocation()}
-            />
-          </div>
         </div>
+      ) : (
+        <p className="text-base leading-6 text-[#6E7787]">
+          Search from platforms on the top!
+        </p>
+      )}
+      <div className="flex gap-8">
+        <Button
+          isDisabled={isLoading}
+          isLoading={isLoading}
+          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-[#F3F4F6] text-[#565E6C]"
+          buttonText="Back"
+          onClick={() => {
+            setCurrentStep(COLLECT_LOCATION_INFO);
+          }}
+        />
+        <Button
+          isDisabled={isLoading}
+          isLoading={isLoading}
+          buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
+          buttonText="Add Location"
+          onClick={() => handleAddLocation()}
+        />
       </div>
     </div>
   );

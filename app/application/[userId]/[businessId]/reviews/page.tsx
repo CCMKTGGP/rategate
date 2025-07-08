@@ -8,7 +8,6 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { REVIEW_TYPES } from "@/constants/review_steps";
 import ArrowDownSvg from "@/app/components/svg/ArrowDown";
-import ReviewCharts from "@/app/components/review-charts/indev";
 import { useReviewsContext } from "@/context/reviewContext";
 import Checkmark from "@/app/components/svg/Checkmark";
 
