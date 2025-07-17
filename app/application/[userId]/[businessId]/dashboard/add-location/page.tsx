@@ -23,6 +23,7 @@ export default function AddLocation() {
   const COLLECT_LOCATION_PLATFORMS = "COLLECT_LOCATION_PLATFORMS";
 
   const [currentStep, setCurrentStep] = useState(COLLECT_LOCATION_INFO);
+  const [strategy, setStrategy] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [platforms, setPlatforms] = useState<Array<IPlatform>>([]);
@@ -136,6 +137,7 @@ export default function AddLocation() {
         name,
         address,
         platforms,
+        locationStrategy: strategy,
       });
       const { data } = response;
       window.location.href = data?.sessionUrl;
@@ -170,6 +172,30 @@ export default function AddLocation() {
           error={error.addressError}
           disabled={isLoading}
         />
+        <div className="flex flex-col">
+          <label
+            htmlFor="positive-feedback"
+            className="block text-sm text-heading mb-2 font-inter font-bold"
+          >
+            Location Strategy
+          </label>
+          <textarea
+            id="location-strategy"
+            placeholder="Enter your location strategy"
+            aria-label="Location Strategy"
+            aria-describedby="location-strategy"
+            name="location-strategy"
+            className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey rounded-md border-stroke/50 ${
+              strategy.length > 0 ? "bg-white" : "bg-[#F3F4F6]"
+            }`}
+            rows={4}
+            cols={50}
+            onChange={(event) => {
+              setStrategy(event.target.value);
+            }}
+            value={strategy}
+          />
+        </div>
         {error.apiError && (
           <ApiError
             message={error.apiError}

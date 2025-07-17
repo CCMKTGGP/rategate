@@ -19,6 +19,7 @@ export interface IBusiness {
   logo_url: string;
   slug: string;
   review_redirect: string;
+  business_strategy: string;
 }
 
 export const INITIAL_BUSINESS_STATE: IBusiness = {
@@ -36,6 +37,7 @@ export const INITIAL_BUSINESS_STATE: IBusiness = {
   logo_url: "",
   slug: "",
   review_redirect: "",
+  business_strategy: "",
 };
 
 const Context = createContext<{

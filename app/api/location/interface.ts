@@ -12,4 +12,5 @@ export interface ILocation {
   total_members?: number;
   platforms?: Array<IPlatform>;
   slug?: string;
+  location_strategy?: string;
 }

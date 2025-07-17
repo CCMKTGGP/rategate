@@ -21,6 +21,18 @@ import ApiSuccess from "../api-success";
 import ApiError from "../api-error";
 import { ILocation } from "@/app/api/location/interface";
 import { IEmployee } from "@/app/api/employee/interface";
+import { Copy } from "lucide-react";
+
+interface IAIReview {
+  _id: string;
+  business_id: string;
+  location_id?: string;
+  strategy_hash: string;
+  text: string;
+  copied: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function ReviewForm({
   businessSlug,
@@ -38,6 +50,16 @@ export default function ReviewForm({
   const [employee, setEmployee] = useState<IEmployee>();
   const [isAllowedToReview, setIsAllowedToReview] = useState(true);
   const [rating, setRating] = useState(0);
+  const [copySuccess, setCopySuccess] = useState<{
+    index: number | null;
+    message: string;
+  }>({
+    index: null,
+    message: "",
+  });
+  const [fetchingAiReviewsLoading, setFetchingAiReviewsLoading] =
+    useState(false);
+  const [aiReviews, setAiReviews] = useState<IAIReview[]>([]);
   const [fetchBusinessDetailsLoading, setFetchBusinessDetailsLoading] =
     useState(true);
   const [fetchLocationDetailsLoading, setFetchLocationDetailsLoading] =
@@ -123,6 +145,37 @@ export default function ReviewForm({
       getEmployeeDetails();
     }
   }, [employeeSlug]);
+
+  useEffect(() => {
+    async function handleFetchAiReviews() {
+      try {
+        const response = await postData(`/api/generate-review`, {
+          businessId: business?._id,
+          locationId: location?._id || null,
+        });
+        const { data } = response;
+        const { reviews } = data;
+        setAiReviews(reviews);
+      } catch (err: any) {
+        setError((error) => ({
+          ...error,
+          apiError: err.message,
+        }));
+      } finally {
+        setFetchingAiReviewsLoading(false);
+      }
+    }
+
+    if (business?._id) {
+      if (
+        business.business_strategy !== null ||
+        (location && location?.location_strategy !== null)
+      ) {
+        setFetchingAiReviewsLoading(true);
+        handleFetchAiReviews();
+      }
+    }
+  }, [business]);
 
   function getBackButton(lastStep: string) {
     return (
@@ -335,6 +388,46 @@ export default function ReviewForm({
     }
   }
 
+  async function handleCopy(
+    reviewId: string,
+    reviewText: string,
+    index: number
+  ) {
+    try {
+      navigator.clipboard.writeText(reviewText).then(() => {
+        setCopySuccess({
+          index: index,
+          message: "Copied to clipboard!",
+        });
+        setTimeout(
+          () =>
+            setCopySuccess({
+              index: null,
+              message: "",
+            }),
+          3000
+        );
+      });
+
+      const response = await postData("/api/prewritten/copy", {
+        reviewId,
+      });
+
+      const { data } = response;
+
+      // 4. If backend returned new reviews (e.g., regenerated), update UI
+      if (data?.reviews?.length) {
+        setAiReviews(data.reviews);
+      }
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+      setError((error) => ({
+        ...error,
+        copyError: "Failed to copy the content.",
+      }));
+    }
+  }
+
   const LANDING_PAGE_COMPONENT = (
     <div className="py-6 flex flex-col gap-8">
       <div className="flex flex-col gap-2">
@@ -441,6 +534,38 @@ export default function ReviewForm({
             }
           </p>
         </div>
+        {/* PRE DEFINED REVIEWS  */}
+        {aiReviews.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <h3 className="text-lg leading-6 text-heading font-archivo font-bold">
+              Or choose a pre-defined review
+            </h3>
+            <div className="flex items-star flex-wrap gap-4">
+              {aiReviews.map((review, index) => (
+                <div
+                  key={review._id}
+                  className="w-[30%] bg-primary/10 border border-primary rounded-[26px] shadow-card px-6 py-3 flex items-center gap-4"
+                >
+                  <p className="text-sm text-primaryHover font-semibold flex-1">
+                    {review.text}
+                  </p>
+                  <div className="relative">
+                    <Copy
+                      stroke="#161D96"
+                      className="cursor-pointer"
+                      onClick={() => handleCopy(review._id, review.text, index)}
+                    />
+                    {index === copySuccess.index && (
+                      <p className="text-sm leading-4 text-white font-medium bg-heading px-4 py-3 rounded-[8px] absolute right-0 w-[200px] text-center">
+                        {copySuccess.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex items-center flex-wrap gap-4">
           {getPlatformsBasedOnId()?.map((platform, index) => {
             return (
@@ -809,7 +934,8 @@ export default function ReviewForm({
   if (
     fetchBusinessDetailsLoading ||
     fetchLocationDetailsLoading ||
-    fetchEmployeeDetailsLoading
+    fetchEmployeeDetailsLoading ||
+    fetchingAiReviewsLoading
   ) {
     return (
       <div className="w-[100vw] h-[100vh] bg-background flex items-center justify-center">

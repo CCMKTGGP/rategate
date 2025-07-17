@@ -20,6 +20,7 @@ export default function Account() {
   const [reviewRedirectUrl, setReviewRedirectUrl] = useState(
     business.review_redirect || ""
   );
+  const [strategy, setStrategy] = useState(business.business_strategy || "");
   const [successMessage, setSuccessMessage] = useState("");
   const [file, setFile] = useState<any>();
   const [fileName, setFileName] = useState("No file chosen");
@@ -92,6 +93,7 @@ export default function Account() {
           name,
           phone_number: phoneNumber,
           review_redirect: reviewRedirectUrl,
+          business_strategy: strategy,
         },
       });
       const { message, data } = response;
@@ -209,6 +211,30 @@ export default function Account() {
                     error={error.reviewRedirectUrlError}
                     disabled={isLoading}
                   />
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="positive-feedback"
+                      className="block text-sm text-heading mb-2 font-inter font-bold"
+                    >
+                      Business Strategy
+                    </label>
+                    <textarea
+                      id="business-strategy"
+                      placeholder="Enter your business strategy"
+                      aria-label="Business Strategy"
+                      aria-describedby="business-strategy"
+                      name="business-strategy"
+                      className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey rounded-md border-stroke/50 ${
+                        strategy.length > 0 ? "bg-white" : "bg-[#F3F4F6]"
+                      }`}
+                      rows={4}
+                      cols={50}
+                      onChange={(event) => {
+                        setStrategy(event.target.value);
+                      }}
+                      value={strategy}
+                    />
+                  </div>
                   {error.apiError && (
                     <ApiError
                       message={error.apiError}
