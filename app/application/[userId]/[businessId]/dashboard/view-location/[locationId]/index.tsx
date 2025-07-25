@@ -452,7 +452,7 @@ export default function ViewLocationClient({
               </div>
               <div className="bg-white py-4 mt-8">
                 <h4 className="text-lg leading-10 text-heading font-medium">
-                  Status
+                  Share your link
                 </h4>
                 <p className="text-sm leading-4 text-subHeading">
                   Copy this link and start collecting reviews!
@@ -544,7 +544,7 @@ export default function ViewLocationClient({
                       setToggleUpdatePlatformModel(true);
                     }}
                   >
-                    Edit Platforms
+                    Add/Edit Platforms
                   </button>
                 </div>
                 <table className="mt-4 table">

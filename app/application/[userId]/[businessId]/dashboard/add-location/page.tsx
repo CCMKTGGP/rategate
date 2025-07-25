@@ -241,7 +241,7 @@ export default function AddLocation() {
     <div className="bg-white rounded-[12px] w-[550px] px-6 py-8 shadow-card border border-stroke/30 flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <h3 className="text-2xl leading-[1.2] text-heading font-archivo font-bold">
-          Search the Platforms Where You Collect Reviews.
+          Add the platforms where you collect reviews for this location.
         </h3>
         <p className="text-base leading-6 text-[#6E7787]">{`location - ${name}.`}</p>
       </div>
@@ -251,7 +251,7 @@ export default function AddLocation() {
           label="Platform Name"
           value={searchTerm}
           autoComplete="off"
-          placeholder="type platforms name..."
+          placeholder="Search for a platform"
           onChange={(event) => setSearchTerm(event.target.value)}
           onFocus={() => setTogglePlatformOptions(true)}
           onBlur={() => setTimeout(() => setTogglePlatformOptions(false), 50)}
@@ -350,7 +350,7 @@ export default function AddLocation() {
         </div>
       ) : (
         <p className="text-base leading-6 text-[#6E7787]">
-          Search from platforms on the top!
+          Type in your review platform names above.
         </p>
       )}
       <div className="flex gap-8">
@@ -367,7 +367,7 @@ export default function AddLocation() {
           isDisabled={isLoading}
           isLoading={isLoading}
           buttonClassName="rounded-md shadow-button hover:shadow-buttonHover bg-primary hover:bg-primaryHover text-white"
-          buttonText="Add Location"
+          buttonText="Add Platform"
           onClick={() => handleAddLocation()}
         />
       </div>

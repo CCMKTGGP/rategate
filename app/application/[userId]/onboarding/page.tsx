@@ -137,7 +137,7 @@ export default function Onboarding() {
             label="Platform Name"
             value={searchTerm}
             autoComplete="off"
-            placeholder="type platforms name..."
+            placeholder="Search for a platform"
             onChange={(event) => setSearchTerm(event.target.value)}
             onFocus={() => setTogglePlatformOptions(true)}
             onBlur={() => setTimeout(() => setTogglePlatformOptions(false), 50)}

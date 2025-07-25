@@ -165,6 +165,7 @@ export async function POST(req: NextRequest) {
         line_items: [{ price: priceId, quantity: 1 }],
         mode,
         customer_email: business.email,
+        allow_promotion_codes: true,
         billing_address_collection: "required",
         success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/payment-success`,
         cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/billing`,
