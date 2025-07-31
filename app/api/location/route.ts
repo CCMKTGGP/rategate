@@ -52,7 +52,7 @@ export const GET = async (request: Request) => {
 export const POST = async (request: Request) => {
   try {
     // extract the request body from request
-    const { userId, businessId, name, address, platforms } =
+    const { userId, businessId, name, address, platforms, locationStrategy } =
       await request.json();
 
     // check if the userId exist and is valid
@@ -118,6 +118,7 @@ export const POST = async (request: Request) => {
           platforms,
           total_reviews: 0,
           total_members: 0,
+          location_strategy: locationStrategy,
           business_id: new Types.ObjectId(business._id),
           slug: newSlug,
         },
@@ -130,6 +131,7 @@ export const POST = async (request: Request) => {
       mode,
       customer_email: business.email,
       billing_address_collection: "required",
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/payment-success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/dashboard/add-location`,
       metadata,

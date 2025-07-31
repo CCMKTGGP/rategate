@@ -41,6 +41,10 @@ const BusinessSchema = new Schema(
       type: String,
       default: null,
     },
+    business_strategy: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

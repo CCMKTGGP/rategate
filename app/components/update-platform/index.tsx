@@ -126,7 +126,7 @@ export default function UpdatePlatforms({
               label="Platform Name"
               value={searchTerm}
               autoComplete="off"
-              placeholder="type platforms name..."
+              placeholder="Search for a platform"
               onChange={(event) => setSearchTerm(event.target.value)}
               onFocus={() => setTogglePlatformOptions(true)}
               onBlur={() =>
@@ -230,7 +230,7 @@ export default function UpdatePlatforms({
             </div>
           ) : (
             <p className="text-base leading-6 text-[#6E7787]">
-              Search from platforms on the top!
+              Type in your review platform names above.
             </p>
           )}
           <div className="flex items-center justify-center gap-8">

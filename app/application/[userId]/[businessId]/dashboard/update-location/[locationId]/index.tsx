@@ -22,6 +22,7 @@ export default function EditLocationClient({
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [strategy, setStrategy] = useState("");
   const [fetchingLocationDetails, setFetchingLocationDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
@@ -37,6 +38,7 @@ export default function EditLocationClient({
         const { data } = await fetchData(`/api/location/${locationId}`);
         setName(data.name);
         setAddress(data.address);
+        setStrategy(data.location_strategy);
       } catch (err: any) {
         setError((error) => ({
           ...error,
@@ -93,6 +95,7 @@ export default function EditLocationClient({
         data: {
           name,
           address,
+          location_strategy: strategy,
         },
       });
       const { message } = response;
@@ -165,6 +168,30 @@ export default function EditLocationClient({
                   error={error.addressError}
                   disabled={isLoading}
                 />
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="positive-feedback"
+                    className="block text-sm text-heading mb-2 font-inter font-bold"
+                  >
+                    Location Strategy
+                  </label>
+                  <textarea
+                    id="location-strategy"
+                    placeholder="Enter your location strategy"
+                    aria-label="Location Strategy"
+                    aria-describedby="location-strategy"
+                    name="location-strategy"
+                    className={`font-inter w-full px-4 py-3 mb-2 outline-none border placeholder:text-md placeholder:text-grey rounded-md border-stroke/50 ${
+                      strategy.length > 0 ? "bg-white" : "bg-[#F3F4F6]"
+                    }`}
+                    rows={4}
+                    cols={50}
+                    onChange={(event) => {
+                      setStrategy(event.target.value);
+                    }}
+                    value={strategy}
+                  />
+                </div>
                 {error.putApiError && (
                   <ApiError
                     message={error.putApiError}

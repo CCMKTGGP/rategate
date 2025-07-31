@@ -189,7 +189,7 @@ export default function Dashboard() {
     if (locations?.length <= 0) {
       return (
         <p className="text-base leading-[24px] font-medium text-subHeading pt-4">
-          No Locations Found. Please create one.
+          No locations found. Please create one.
         </p>
       );
     }
@@ -297,7 +297,7 @@ export default function Dashboard() {
             </p>
             <div className="bg-white py-4 mt-8">
               <h4 className="text-lg leading-10 text-heading font-medium">
-                Status
+                Share your link
               </h4>
               <p className="text-sm leading-4 text-subHeading">
                 Copy this link and start collecting reviews!
@@ -389,7 +389,7 @@ export default function Dashboard() {
                     setToggleUpdatePlatformModel(true);
                   }}
                 >
-                  Edit Platforms
+                  Add/Edit Platforms
                 </button>
               </div>
               <table className="mt-4 table">

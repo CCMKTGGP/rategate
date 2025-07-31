@@ -40,6 +40,10 @@ const LocationSchema = new Schema(
       ref: "Business",
       default: null,
     },
+    location_strategy: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -118,7 +118,7 @@ export default function Trends() {
               Trends
             </h3>
             <p className="text-base leading-[24px] font-medium text-subHeading ">
-              One liner for trends description.
+              {"See how your team(s) and location(s) are performing over time."}
             </p>
             <div className="my-8 flex flex-col gap-2">
               <h3 className="font-archivo text-2xl leading-[48px] text-heading font-semibold">

@@ -147,6 +147,7 @@ export const POST = async (request: Request) => {
       mode,
       customer_email: business.email,
       billing_address_collection: "required",
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/payment-success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/application/${userId}/${businessId}/dashboard/view-location/${locationId}/add-employee`,
       metadata,
