@@ -458,7 +458,7 @@ export default function Dashboard() {
                       : `${negativeReviews} Reviews`}
                   </p>
                 </div>
-                <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
+                {/* <div className="min-w-[140px] max-w-[150px] min-h-[140px] max-h-[180px] bg-white border-2 border-stroke/60 rounded-[12px] flex flex-col items-center justify-center gap-4 py-4">
                   <div className="flex flex-col items-center gap-2 pt-2">
                     <Image
                       src={"/private-reviews.svg"}
@@ -476,7 +476,7 @@ export default function Dashboard() {
                       ? "Fetching..."
                       : `${privateReviews} Reviews`}
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

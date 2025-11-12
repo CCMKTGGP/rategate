@@ -594,7 +594,7 @@ export default function ReviewForm({
             );
           })}
         </div>
-        <hr className="w-full lg:w-[50%]" />
+        {/* <hr className="w-full lg:w-[50%]" />
         <div className="flex flex-col gap-4 w-full lg:w-[50%]">
           <div className="flex flex-col">
             <label
@@ -676,7 +676,7 @@ export default function ReviewForm({
               }))
             }
           />
-        )}
+        )} */}
       </div>
     </div>
   );

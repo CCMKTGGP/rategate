@@ -356,7 +356,7 @@ export default function CustomerFlowReviewForm({
             );
           })}
         </div>
-        <hr className="w-full lg:w-[50%]" />
+        {/* <hr className="w-full lg:w-[50%]" />
         <div className="flex flex-col gap-4 w-full lg:w-[50%]">
           <p className="text-2xl leading-8 text-heading font-archivo font-bold">
             Share response privately
@@ -433,7 +433,7 @@ export default function CustomerFlowReviewForm({
               }))
             }
           />
-        )}
+        )} */}
       </div>
     </div>
   );
