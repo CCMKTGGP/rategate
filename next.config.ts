@@ -9,6 +9,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+   async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "rategate.vercel.app",
+          },
+        ],
+        destination: "https://reviews.rategate.cc/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
