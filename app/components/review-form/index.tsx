@@ -540,11 +540,13 @@ export default function ReviewForm({
             <h3 className="text-lg leading-6 text-heading font-archivo font-bold">
               Or choose a pre-defined review
             </h3>
-            <div className="flex items-star flex-wrap gap-4">
+            <div className="flex flex-col md:flex-row md:flex-wrap items-start gap-4">
               {aiReviews.map((review, index) => (
                 <div
                   key={review._id}
-                  className="w-[30%] bg-primary/10 border border-primary rounded-[26px] shadow-card px-6 py-3 flex items-center gap-4"
+                  className={`w-full md:w-[30%] bg-primary/10 border border-primary shadow-card px-6 py-3 items-center gap-4 rounded-[12px] md:rounded-[18px] ${
+                    index >= 3 ? "hidden md:flex" : "flex"
+                  }`}
                 >
                   <p className="text-sm text-primaryHover font-semibold flex-1">
                     {review.text}
