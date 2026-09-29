@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
 import Location from "@/lib/models/location";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 import Employee from "@/lib/models/employee";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
 
 type Params = Promise<{ locationId: string }>;
 
@@ -147,7 +145,7 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
       if (employee.employee_subscription_id) {
         try {
           // Cancel the subscription using the employee's subscription ID
-          await stripe.subscriptions.cancel(employee.employee_subscription_id);
+          await getStripe().subscriptions.cancel(employee.employee_subscription_id);
           employee.employee_subscription_id = null;
           await employee.save();
         } catch (error) {
@@ -172,7 +170,7 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
 
     // Cancel the Stripe subscription for the location
     try {
-      await stripe.subscriptions.cancel(location.location_subscription_id);
+      await getStripe().subscriptions.cancel(location.location_subscription_id);
       location.location_subscription_id = null;
     } catch (error) {
       return new NextResponse(

@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { Types } from "mongoose";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 import Employee from "@/lib/models/employee";
 import Location from "@/lib/models/location";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
 
 type Params = Promise<{ employeeId: string }>;
 
@@ -158,7 +156,7 @@ export const DELETE = async (request: Request, context: { params: Params }) => {
     // cancel subscription flow
     try {
       // Cancel the Stripe subscription
-      await stripe.subscriptions.cancel(employee.employee_subscription_id);
+      await getStripe().subscriptions.cancel(employee.employee_subscription_id);
       employee.employee_subscription_id = null;
 
       // decrease the count of total members from the location.
