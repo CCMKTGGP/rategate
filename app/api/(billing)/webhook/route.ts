@@ -6,8 +6,7 @@ import Location from "@/lib/models/location";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
+import { getStripe } from "@/lib/stripe";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -18,7 +17,7 @@ export const POST = async (req: NextRequest) => {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    event = getStripe().webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     return new NextResponse("Webhook Error: ", { status: 400 });
   }

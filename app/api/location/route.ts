@@ -6,10 +6,8 @@ import Business from "@/lib/models/business";
 import User from "@/lib/models/user";
 import Location from "@/lib/models/location";
 import PAYMENT_CONSTANTS from "@/utils/payments";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 import { SUBSCRIPTION_TYPES } from "@/constants/subscription_types";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
 
 // get all locations for a business id
 export const GET = async (request: Request) => {
@@ -126,7 +124,7 @@ export const POST = async (request: Request) => {
     };
 
     // Handle lifetime plan (one-time payment)
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode,
       customer_email: business.email,

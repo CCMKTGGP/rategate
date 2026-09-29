@@ -6,9 +6,7 @@ import User from "@/lib/models/user";
 import { PlanTypes } from "@/utils/planTypes";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   const { planId, userId, businessId } = await req.json();
@@ -109,7 +107,7 @@ export async function POST(req: NextRequest) {
     if (business.subscription_id) {
       try {
         // Cancel the Stripe subscription
-        await stripe.subscriptions.cancel(business.subscription_id);
+        await getStripe().subscriptions.cancel(business.subscription_id);
         // Update the business's record: clear subscriptionId and plan
         business.subscription_id = null;
         business.plan_id = new Types.ObjectId(freePlan?.[0]?._id);

@@ -7,9 +7,7 @@ import PAYMENT_CONSTANTS from "@/utils/payments";
 import { PlanTypes } from "@/utils/planTypes";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY!);
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   const { planId, userId, businessId } = await req.json();
@@ -127,7 +125,7 @@ export async function POST(req: NextRequest) {
       business.subscription_id
     ) {
       // Retrieve the subscription to get the subscription item ID
-      const subscription = await stripe.subscriptions.retrieve(
+      const subscription = await getStripe().subscriptions.retrieve(
         business.subscription_id
       );
 
@@ -135,7 +133,7 @@ export async function POST(req: NextRequest) {
       const subscriptionItemId = subscription.items.data[0].id;
 
       // Update existing subscription
-      const updatedSubscription = await stripe.subscriptions.update(
+      const updatedSubscription = await getStripe().subscriptions.update(
         business.subscription_id,
         {
           proration_behavior: "none",
@@ -161,7 +159,7 @@ export async function POST(req: NextRequest) {
       );
     } else {
       // Create new subscription
-      const session = await stripe.checkout.sessions.create({
+      const session = await getStripe().checkout.sessions.create({
         line_items: [{ price: priceId, quantity: 1 }],
         mode,
         customer_email: business.email,

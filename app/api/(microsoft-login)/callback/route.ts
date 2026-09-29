@@ -1,13 +1,10 @@
 import { COLLECT_BUSINESS_NAME } from "@/constants/onboarding-constants";
 import connect from "@/lib/db";
-import { msalConfig } from "@/lib/microsoftClient";
+import { getMsalClient } from "@/lib/microsoftClient";
 import Plan from "@/lib/models/plan";
 import User from "@/lib/models/user";
 import { splitFullName } from "@/utils/registerUtils";
-import { ConfidentialClientApplication } from "@azure/msal-node";
 import { NextRequest, NextResponse } from "next/server";
-
-const cca = new ConfidentialClientApplication(msalConfig);
 
 export async function GET(req: NextRequest) {
   const code: string = req.nextUrl.searchParams.get("code") as string;
@@ -19,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     // get the user details from the code
-    const result = await cca.acquireTokenByCode({
+    const result = await getMsalClient().acquireTokenByCode({
       code,
       scopes: ["User.Read"],
       redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback`,

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/openai";
 import crypto from "crypto";
 import connect from "@/lib/db";
 import Business from "@/lib/models/business";
 import Location from "@/lib/models/location";
 import PreWrittenReview from "@/lib/models/prewritten-review";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 // helper
 function hashStrategy(text: string) {
@@ -95,7 +93,7 @@ Generate 15 distinct, natural-sounding customer reviews with a positive tone, ea
   ...
 ]
 `;
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
